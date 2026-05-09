@@ -23,6 +23,8 @@
 ```text
 qa-agent-workflows/
   AGENTS.md
+  docs/
+    skill-authoring/
   shared/
     common_contract.md
     evidence_and_confidence_policy.md
@@ -54,17 +56,10 @@ qa-agent-workflows/
 ## Change Policy
 
 - 既存のステップID、成果物ID、参照IDは可能な限り維持する。
-- 既存プロンプト本文を更新する場合は、責務の重複を増やさない。共通ルールは `AGENTS.md` または `shared/`、skill固有ルールは該当 skill の `references/` に置く。
-- `SKILL.md` は入口、目的、トリガー、入出力、workflow、参照ファイル一覧に限定し、巨大な実行マニュアルにしない。
+- 共通ルールは `shared/`、skill固有ルールは該当 skill の `references/` に置き、責務の重複を増やさない。
+- skill の追加・再構成時の詳細方針は `docs/skill-authoring/` に置く。
 
-### File Size Policy
+## Skill Maintenance
 
-- 1ファイルは「1回の作業で必要な範囲を一度に読み切れる量」を目安にする。
-- `AGENTS.md` は原則120行以内、最大200行を目安にし、業務別の詳細は `shared/` または各 skill 配下へ分離する。
-- 各 skill の `SKILL.md` は原則200行以内、最大300行を目安にする。300行を超える場合は、詳細を `steps/`、`references/`、`templates/` へ分離する。
-- 各 `steps/*.md` は原則180行以内、最大250行を目安にする。250行を超える場合は、判断基準・例・テンプレートを別ファイル化する。
-- `references/*.md` が100行を超える場合は冒頭に目次を置き、300行を超える場合はテーマ別に分割する。
-- `templates/*.md` はできるだけ100行以内にし、複数テンプレートを1ファイルに詰め込まない。
-- `examples/*.md` は1ファイル1テーマを基本とし、良い例・悪い例・完成例が長い場合は分割する。
-- `scripts/` は行数より責務の単位を優先し、1機能1スクリプトを目安にする。
-- 同じルールを `AGENTS.md`、`SKILL.md`、`steps/` に重複記載しない。
+新しい skill を追加する場合、または既存プロンプト群を skill 形式へ再編成する場合は、`docs/skill-authoring/README.md` に従う。
+詳細な作成・再構成手順は `AGENTS.md` に置かず、`docs/skill-authoring/` に分離する。
