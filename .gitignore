@@ -5,3 +5,6 @@ outputs/runs/*
 # Shareable examples may be committed intentionally.
 !outputs/examples/
 !outputs/examples/**
+
+# Working directory
+work/*
