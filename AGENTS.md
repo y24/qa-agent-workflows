@@ -19,6 +19,7 @@
 - `$risk-based-test-design`: リスク候補の抽出、評価、優先度付け、リスクベースのテスト方針とテストケース骨子を作る。
 - `$nonfunctional-quality-criteria-planning`: 非機能品質の懸念抽出、品質クライテリア策定、確認方針・テスト計画組み込み案を作る。
 - `$test-design-review`: 既存のテスト設計書、観点表、テストケース一覧を根拠付きでレビューし、指摘、カバレッジ懸念、改善提案、優先度を整理する。
+- `$defect-analysis`: 不具合チケットから事実抽出、分類・傾向分析、品質リスク化、後続テスト設計向け示唆を作る。
 
 ## Repository Layout
 
@@ -47,6 +48,7 @@ qa-agent-workflows/
       risk-based-test-design/
       nonfunctional-quality-criteria-planning/
       test-design-review/
+      defect-analysis/
 ```
 
 各 skill は `SKILL.md` を入口とし、詳細な実行手順は `steps/`、判断基準や定義は `references/`、出力形式は `templates/` に置く。
