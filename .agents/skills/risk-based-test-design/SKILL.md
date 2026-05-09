@@ -41,6 +41,7 @@ description: Use when identifying product risks, assessing impact and likelihood
   - `../../../shared/review_gate_policy.md`
   - `../../../shared/traceability_policy.md`
   - `../../../shared/output_style.md`
+  - `../../../shared/output_location_policy.md`
   - `../../../shared/input_document_handling.md`
   - `../../../shared/test_design_granularity_policy.md`
 - skill固有ルール: `rules.md`

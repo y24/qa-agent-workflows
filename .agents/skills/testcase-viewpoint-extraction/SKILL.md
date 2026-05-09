@@ -44,6 +44,7 @@ description: Use when extracting test intent, abstract test viewpoints, viewpoin
   - `../../../shared/review_gate_policy.md`
   - `../../../shared/traceability_policy.md`
   - `../../../shared/output_style.md`
+  - `../../../shared/output_location_policy.md`
   - `../../../shared/test_design_granularity_policy.md`
 - skill固有ルール: `rules.md`
 - 実行順序と停止条件: `orchestrator.md`

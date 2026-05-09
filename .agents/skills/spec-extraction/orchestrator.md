@@ -34,6 +34,7 @@
 - `../../../shared/review_gate_policy.md`
 - `../../../shared/traceability_policy.md`
 - `../../../shared/output_style.md`
+- `../../../shared/output_location_policy.md`
 - `../../../shared/input_document_handling.md`
 
 ## Step別参照

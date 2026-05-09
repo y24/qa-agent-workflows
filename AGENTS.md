@@ -34,6 +34,7 @@ qa-agent-workflows/
     input_document_handling.md
     test_design_granularity_policy.md
     output_style.md
+    output_location_policy.md
     terminology.md
     review_gate_policy.md
     templates/
@@ -47,6 +48,16 @@ qa-agent-workflows/
 ```
 
 各 skill は `SKILL.md` を入口とし、詳細な実行手順は `steps/`、判断基準や定義は `references/`、出力形式は `templates/` に置く。
+
+## Output Location
+
+- ユーザーまたは作業対象リポジトリが出力先を指定している場合は、その指定を優先する。
+- 指定がない場合、業務実行時の成果物は原則として `outputs/runs/<run_id>/` 配下に出力する。
+- `run_id` は `YYYYMMDD-HHMMSS_<topic_slug>` 形式を基本とする。
+- 複数 skill をまたぐ作業では、同一 run ディレクトリ配下に skill 名ごとのサブディレクトリを作成する。
+- 最終成果物は `final/`、CSVやJSONなどの機械処理向け成果物は `exports/` に置く。
+- `.agents/skills/`、`shared/`、`docs/` に業務成果物を混在させない。
+- 詳細は `shared/output_location_policy.md` に従う。
 
 ## Output Conventions
 

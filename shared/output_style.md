@@ -38,3 +38,7 @@
 - `templates/issue_log_template.md`
 - `templates/evidence_table_template.md`
 - `templates/traceability_matrix_template.md`
+
+## Related Policies
+
+- `output_location_policy.md`
