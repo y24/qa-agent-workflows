@@ -18,3 +18,11 @@
 - `inferred` と `low` の成果物は、レビュー対象または確認事項に含める。
 - `unknown` を仕様として補完しない。
 - 複数資料が矛盾する場合は、片方を採用せず、矛盾として記録する。
+- 期待結果、テスト条件、リスク、優先度には、可能な範囲で根拠または前段IDを付与する。
+- 根拠が弱い重大事項は、黙って削除せず issue log に残す。
+
+## Related Shared References
+
+- `common_contract.md`
+- `ambiguity_and_issue_log_policy.md`
+- `traceability_policy.md`

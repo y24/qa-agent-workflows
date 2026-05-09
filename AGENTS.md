@@ -24,11 +24,16 @@
 qa-agent-workflows/
   AGENTS.md
   shared/
-    qa_common_contract.md
+    common_contract.md
     evidence_and_confidence_policy.md
-    terminology.md
+    ambiguity_and_issue_log_policy.md
+    traceability_policy.md
+    input_document_handling.md
+    test_design_granularity_policy.md
     output_style.md
+    terminology.md
     review_gate_policy.md
+    templates/
   .agents/
     skills/
       spec-extraction/

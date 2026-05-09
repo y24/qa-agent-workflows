@@ -34,7 +34,15 @@ description: Use when designing scenario tests from requirements, business rules
 
 ## 参照ファイル
 
-- 共通ルール: `rules.md`
+- 共通方針:
+  - `../../../shared/common_contract.md`
+  - `../../../shared/evidence_and_confidence_policy.md`
+  - `../../../shared/ambiguity_and_issue_log_policy.md`
+  - `../../../shared/review_gate_policy.md`
+  - `../../../shared/traceability_policy.md`
+  - `../../../shared/output_style.md`
+  - `../../../shared/test_design_granularity_policy.md`
+- skill固有ルール: `rules.md`
 - 実行順序と停止条件: `orchestrator.md`
 - ステップ別手順: `steps/`
 - 判断基準と補助定義: `references/`

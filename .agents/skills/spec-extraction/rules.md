@@ -1,6 +1,9 @@
 # rules.md
 
-# Spec Extraction 共通ルール
+# Spec Extraction 固有ルール
+
+共通の行動契約、根拠、issue、レビュー停止、出力形式、トレーサビリティは `../../../shared/` 配下の方針に従う。
+このファイルでは `$spec-extraction` 固有の責務、ID、禁止事項を定義する。
 
 ## 目的
 

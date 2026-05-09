@@ -26,6 +26,16 @@
 - 推測、仮説、確認事項、未確定事項を明示する。
 - 未処理範囲を隠さない。
 
+## 共通参照
+
+- `../../../shared/common_contract.md`
+- `../../../shared/evidence_and_confidence_policy.md`
+- `../../../shared/ambiguity_and_issue_log_policy.md`
+- `../../../shared/review_gate_policy.md`
+- `../../../shared/traceability_policy.md`
+- `../../../shared/output_style.md`
+- `../../../shared/input_document_handling.md`
+
 ## Step別参照
 
 | Step | 必須参照 | 必要時参照 |

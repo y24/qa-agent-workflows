@@ -26,6 +26,17 @@
 - 推測、仮説、確認事項、未確定事項は明示する。
 - 各Step完了後、ユーザーから明示的な続行指示があるまで次Stepへ進まない。
 
+## 共通参照
+
+- `../../../shared/common_contract.md`
+- `../../../shared/evidence_and_confidence_policy.md`
+- `../../../shared/ambiguity_and_issue_log_policy.md`
+- `../../../shared/review_gate_policy.md`
+- `../../../shared/traceability_policy.md`
+- `../../../shared/output_style.md`
+- `../../../shared/input_document_handling.md`
+- `../../../shared/test_design_granularity_policy.md`
+
 ## Step別参照
 
 | Step | 必須参照 | 必要時参照 |
