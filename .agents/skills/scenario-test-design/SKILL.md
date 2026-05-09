@@ -37,6 +37,7 @@ Stop after each step and wait for user review unless the user explicitly asks to
 - Common rules: `rules.md`
 - Flow control: `orchestrator.md`
 - Step guides: `steps/`
+- Decision policies: `references/`
 - Output and support templates: `templates/`
 
 ## Guardrails
