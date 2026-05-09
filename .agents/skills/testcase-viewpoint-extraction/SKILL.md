@@ -3,18 +3,18 @@ name: testcase-viewpoint-extraction
 description: Use when extracting test intent, abstract test viewpoints, viewpoint catalogs, and traceability from existing test cases. Do not use to generate new tests from requirements alone.
 ---
 
-# Testcase Viewpoint Extraction
+# テストケース観点抽出 skill
 
-## Purpose
+## 目的
 
-Analyze existing test cases, extract their intent and reusable QA viewpoints, and produce a traceable viewpoint catalog.
+既存テストケースを分析し、各ケースの意図と再利用可能なQA観点を抽出する。抽出結果は、根拠を追跡できる観点カタログとして整理する。
 
-## Inputs
+## 入力
 
-- Existing test case lists, test procedures, expected results, or test management exports
-- Related screen specs or requirements, if available
+- 既存のテストケース一覧、テスト手順、期待結果、テスト管理ツールのエクスポート
+- 関連する画面仕様や要件がある場合は、その資料
 
-## Outputs
+## 出力
 
 - `01_testcase_inventory.md`
 - `01_input_issues.md`
@@ -26,25 +26,25 @@ Analyze existing test cases, extract their intent and reusable QA viewpoints, an
 - `04_final_issue_log.md`
 - `04_final_summary.md`
 
-## Workflow
+## ワークフロー
 
-1. Input normalization and testcase inventory
-2. Intent and viewpoint candidate extraction
-3. Abstract viewpoint cataloging
-4. Traceability check and finalization
+1. 入力の正規化とテストケースインベントリ作成
+2. 意図と観点候補の抽出
+3. 抽象化された観点カタログの作成
+4. トレーサビリティ確認と最終化
 
-Stop after each step and wait for user review unless the user explicitly asks to continue.
+ユーザーが明示的に継続を指示しない限り、各ステップ完了後に停止し、レビューを待つ。
 
-## References
+## 参照ファイル
 
-- Common rules: `rules.md`
-- Flow control: `orchestrator.md`
-- Step guides: `steps/`
-- Definitions and policies: `references/`
-- Output templates: `templates/`
+- 共通ルール: `rules.md`
+- 実行順序と停止条件: `orchestrator.md`
+- ステップ別手順: `steps/`
+- 定義と判断基準: `references/`
+- 出力テンプレート: `templates/`
 
-## Guardrails
+## ガードレール
 
-- Derive viewpoints from existing test cases, not from unrelated requirements.
-- Keep low-confidence interpretations in issue logs or review items.
-- Exclude unsupported viewpoints from final outputs unless explicitly marked for review.
+- 観点は既存テストケースから抽出し、無関係な要件から新規生成しない。
+- 確信度の低い解釈は issue log またはレビュー事項に残す。
+- 根拠が不足する観点は、レビュー対象として明示しない限り最終成果物に含めない。

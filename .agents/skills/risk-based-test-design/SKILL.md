@@ -3,18 +3,18 @@ name: risk-based-test-design
 description: Use when identifying product risks, assessing impact and likelihood, prioritizing test scope, and deriving risk-based test strategy or testcase outlines. Do not use when the user only wants scenario flow design without risk assessment.
 ---
 
-# Risk-Based Test Design
+# リスクベースドテスト設計 skill
 
-## Purpose
+## 目的
 
-Identify and assess product risks, decide risk-based test priorities, and translate high-priority risks into test strategy and testcase outlines.
+プロダクトリスクを抽出・評価し、リスクに基づくテスト優先度を決める。優先度の高いリスクは、テスト方針とテストケース骨子へ落とし込む。
 
-## Inputs
+## 入力
 
-- Requirements, design documents, screen specs, API specs, architecture notes, past defects, operational constraints, or extracted spec inventories
-- Existing risk lists or user-provided risk concerns, if available
+- 要件、設計書、画面仕様、API仕様、アーキテクチャメモ、過去障害、運用制約、仕様抽出結果
+- 既存のリスク一覧、またはユーザーから提示された懸念事項
 
-## Outputs
+## 出力
 
 - `01_input_scope_summary.md`
 - `02_risk_candidate_list.md`
@@ -22,26 +22,26 @@ Identify and assess product risks, decide risk-based test priorities, and transl
 - `04_risk_based_test_strategy.md`
 - `05_testcase_outline_and_traceability.md`
 
-## Workflow
+## ワークフロー
 
-1. Input source normalization and scope confirmation
-2. Risk candidate extraction
-3. Risk assessment and prioritization
-4. Risk-based test strategy
-5. Testcase outline and traceability generation
+1. 入力ソースの正規化とスコープ確認
+2. リスク候補の抽出
+3. リスク評価と優先度付け
+4. リスクベースのテスト方針作成
+5. テストケース骨子とトレーサビリティの作成
 
-Stop after each step and wait for user review unless the user explicitly asks to continue.
+ユーザーが明示的に継続を指示しない限り、各ステップ完了後に停止し、レビューを待つ。
 
-## References
+## 参照ファイル
 
-- Common rules: `rules.md`
-- Flow control: `orchestrator.md`
-- Step guides: `steps/`
-- Risk taxonomy and scoring: `references/`
-- Output templates: `templates/`
+- 共通ルール: `rules.md`
+- 実行順序と停止条件: `orchestrator.md`
+- ステップ別手順: `steps/`
+- リスク分類と評価基準: `references/`
+- 出力テンプレート: `templates/`
 
-## Guardrails
+## ガードレール
 
-- Do not score risks without stating evidence and assumptions.
-- Keep unassessable risks as unresolved or out-of-scope rather than forcing a score.
-- Do not over-detail executable test procedures in this skill unless explicitly requested.
+- 根拠と前提を示さずにリスクスコアを付けない。
+- 評価できないリスクは、無理に採点せず `未解決`、`情報不足`、`対象外` として扱う。
+- ユーザーが明示的に求めない限り、この skill では実行手順レベルの詳細テストケースまで作り込まない。

@@ -3,18 +3,18 @@ name: spec-extraction
 description: Use when extracting, normalizing, and reviewing test-design inputs from development documents, requirements, screen specs, API specs, design notes, or domain documents. Do not use to create detailed test cases directly.
 ---
 
-# Spec Extraction
+# 仕様抽出 skill
 
-## Purpose
+## 目的
 
-Extract facts from development documents and transform them into traceable, normalized inputs for later QA design work.
+開発文書から事実を抽出し、後続のQA設計で使えるように、根拠付きで正規化された入力情報へ整理する。
 
-## Inputs
+## 入力
 
-- Requirements, design documents, screen specs, API specs, domain rules, release notes, or related development documents
-- User-specified document scope and priority, if provided
+- 要件、設計書、画面仕様、API仕様、ドメインルール、リリースノート、その他の開発文書
+- ユーザーが指定した文書スコープや優先度
 
-## Outputs
+## 出力
 
 - `document_inventory.md`
 - `raw_extraction.md`
@@ -22,27 +22,27 @@ Extract facts from development documents and transform them into traceable, norm
 - `test_design_input_catalog.md`
 - `gap_and_review_report.md`
 
-## Workflow
+## ワークフロー
 
-1. Document inventory
-2. Raw fact extraction
-3. Normalization and consolidation
-4. Test design input cataloging
-5. Gap and review report
+1. 文書インベントリ作成
+2. 原文ベースの事実抽出
+3. 正規化と統合
+4. テスト設計入力カタログ化
+5. ギャップとレビュー事項の整理
 
-Stop after each step and wait for user review unless the user explicitly asks to continue.
+ユーザーが明示的に継続を指示しない限り、各ステップ完了後に停止し、レビューを待つ。
 
-## References
+## 参照ファイル
 
-- Common rules: `rules.md`
-- Flow control: `orchestrator.md`
-- Step guides: `steps/`
-- Evidence and category references: `references/`
-- Output templates: `templates/`
+- 共通ルール: `rules.md`
+- 実行順序と停止条件: `orchestrator.md`
+- ステップ別手順: `steps/`
+- 証拠・分類・正規化の基準: `references/`
+- 出力テンプレート: `templates/`
 
-## Guardrails
+## ガードレール
 
-- Do not infer missing specifications as facts.
-- Keep source evidence and IDs traceable.
-- Do not create detailed test cases in this skill.
-- Mark contradictions, missing information, and insufficient detail explicitly.
+- 不足している仕様を事実として推測補完しない。
+- 情報源、証拠、IDのトレーサビリティを維持する。
+- この skill では詳細テストケースを作成しない。
+- 矛盾、欠落、粒度不足は明示的に記録する。
