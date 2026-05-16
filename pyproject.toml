@@ -31,4 +31,5 @@ qa_workflow_toolkit = ["assets/**/*"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+cache_dir = ".pytest_cache/cache"
 norecursedirs = [".git", ".pytest_cache", "pytest-cache-files-*", "work", "outputs"]
