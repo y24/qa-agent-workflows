@@ -62,6 +62,106 @@ def test_install_outputs_example_prompt() -> None:
         shutil.rmtree(target, ignore_errors=True)
 
 
+def test_wiki_init_creates_llm_wiki_assets() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--name",
+                "Research Wiki",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert "Created 17 item(s)." in result.output
+        assert (target / "AGENTS.md").is_file()
+        assert (target / "raw" / ".gitkeep").is_file()
+        assert (target / "wiki" / ".gitkeep").is_file()
+        assert (target / ".temp" / ".gitkeep").is_file()
+        assert (target / "index.md").is_file()
+        assert (target / "log.md").is_file()
+        assert (target / ".roo" / "commands" / "ingest.md").is_file()
+        assert (target / ".roo" / "commands" / "query.md").is_file()
+        assert (target / ".roo" / "commands" / "lint.md").is_file()
+        assert (target / ".roo" / "commands" / "convert.md").is_file()
+        assert (target / ".agents" / "skills" / "ingest" / "SKILL.md").is_file()
+        assert "Research Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
+        assert 'markitdown "<input>" -o "<output>"' in (
+            target / ".agents" / "skills" / "convert" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_wiki_init_uses_target_folder_name_by_default_with_yes() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-default-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(app, ["wiki", "init", "--target", str(target), "--yes"])
+
+        assert result.exit_code == 0
+        assert f"# {target.name} LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
+        assert "Select target agent" not in result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_wiki_init_prompts_before_overwriting_existing_agents_md(monkeypatch: pytest.MonkeyPatch) -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-existing-agents-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    (target / "AGENTS.md").write_text("existing instructions", encoding="utf-8")
+    confirm_messages: list[str] = []
+
+    class ConfirmPrompt:
+        def __init__(self, message: str) -> None:
+            self.message = message
+
+        def ask(self) -> bool:
+            confirm_messages.append(self.message)
+            return True
+
+    class FakeQuestionary:
+        @staticmethod
+        def confirm(message: str, default: bool = True) -> ConfirmPrompt:
+            return ConfirmPrompt(message)
+
+    try:
+        monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+        result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--name",
+                "Existing Wiki",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert confirm_messages == [
+            f"{target.resolve()}\\AGENTS.md already exists. Overwrite it with LLM wiki AGENTS.md?",
+            "Initialize this LLM wiki?",
+        ]
+        assert "Overwritten 1 item(s)." in result.output
+        assert "Existing Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
 def test_install_can_skip_agents_md() -> None:
     target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
     target.mkdir(parents=True)

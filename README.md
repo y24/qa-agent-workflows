@@ -22,6 +22,7 @@ pip install -e .
 
 ```bash
 qatool
+qatool wiki init
 qatool workflow list
 qatool workflow install
 qatool workflow update
@@ -31,11 +32,45 @@ qatool workflow uninstall
 非対話で導入する例:
 
 ```bash
+qatool wiki init --name research-notes --agent roocode --yes
 qatool workflow install --workflow scenario-test-design --agent roocode --yes
 qatool workflow install --workflow all --agent roocode --yes
 qatool workflow update --workflow all --agent roocode --yes
 qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
 ```
+
+## LLM Wiki Init
+
+`qatool wiki init` は、LLMが保守するMarkdown wikiの初期状態をカレントディレクトリに作成します。
+対話実行ではwiki名を入力します。未入力のままEnterすると、対象ディレクトリ名を使います。
+agent選択は現在 `roocode` のみです。
+
+作成される主なファイルとディレクトリ:
+
+```text
+target-project/
+├─ AGENTS.md
+├─ raw/
+├─ wiki/
+├─ .temp/
+├─ index.md
+├─ log.md
+├─ .agents/
+│  └─ skills/
+│     ├─ ingest/
+│     ├─ query/
+│     ├─ lint/
+│     └─ convert/
+└─ .roo/
+   └─ commands/
+      ├─ ingest.md
+      ├─ query.md
+      ├─ lint.md
+      └─ convert.md
+```
+
+RooCodeでは `/convert`、`/ingest`、`/query`、`/lint` を利用できます。
+`/convert` は `.temp/` に置いた変換前ファイルを `markitdown` コマンドでMarkdown化し、`raw/` に配置するためのcommandです。
 
 ## Installed Layout
 
@@ -58,3 +93,5 @@ RooCodeでは `/scenario-test-design docsフォルダの資料を参照してシ
 `workflow update` はインストール時に `.qa-toolkit/workflows.json` へ保存した workflow 名、リポジトリ単位の agent 種別、`AGENTS.md` 作成有無を参照し、インストール済みworkflowを現在のpackage assetsで更新します。更新対象のうち差分がない項目はplanに表示せず、差分がある項目だけをまとめて上書きします。
 
 `workflow uninstall` はpackage assetsと完全一致するworkflow固有の `.agents/skills/<workflow>/` と `.roo/commands/<workflow>.md` を削除します。手動編集済みのファイルは削除せず、`--workflow all` の場合のみ共有ファイルも削除候補にします。
+
+workflow一覧の表示順は、各 `src/qa_workflow_toolkit/assets/workflows/<workflow>/workflow.json` の `sort_order` で制御します。未指定のworkflowは、`sort_order` 指定済みworkflowの後ろにID順で表示されます。

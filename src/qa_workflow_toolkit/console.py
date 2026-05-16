@@ -8,6 +8,7 @@ from rich.table import Table
 from rich.text import Text
 
 from .models import InstallPlanItem, UninstallPlanItem, WorkflowManifest
+from .wiki import WikiInitItem
 
 console = Console()
 
@@ -43,11 +44,14 @@ def _gradient_color(ratio: float) -> str:
 def print_usage() -> None:
     print_header()
     console.print("[bold]Usage[/bold]")
+    console.print("  qatool wiki init           Initialize an LLM wiki in current folder")
     console.print("  qatool workflow install    Install QA workflow assets into current folder")
     console.print("  qatool workflow update     Update installed QA workflow assets")
     console.print("  qatool workflow uninstall  Remove installed QA workflow assets")
     console.print("  qatool workflow list       Show available workflows\n")
     console.print("[bold]Examples[/bold]")
+    console.print("  qatool wiki init")
+    console.print("  qatool wiki init --name research-notes --agent roocode --yes")
     console.print("  qatool workflow install")
     console.print("  qatool workflow install --workflow scenario-test-design --agent roocode --yes")
     console.print("  qatool workflow install --workflow all --agent roocode --yes")
@@ -92,7 +96,32 @@ def print_uninstall_plan(plan: list[UninstallPlanItem]) -> None:
     console.print(table)
 
 
+def print_wiki_init_plan(plan: list[WikiInitItem], overwrite: bool, overwrite_targets: set | None = None) -> None:
+    overwrite_targets = overwrite_targets or set()
+    table = Table(title="Wiki init plan")
+    table.add_column("Kind")
+    table.add_column("Target")
+    table.add_column("Exists")
+    table.add_column("Action")
+    for item in plan:
+        table.add_row(
+            item.kind,
+            str(item.target),
+            "yes" if item.exists else "no",
+            _wiki_init_action_label(item, overwrite, overwrite_targets),
+        )
+    console.print(table)
+
+
 def _plan_action_label(item: InstallPlanItem) -> str:
     if not item.exists:
         return "create"
     return item.action.value if item.action else ""
+
+
+def _wiki_init_action_label(item: WikiInitItem, overwrite: bool, overwrite_targets: set) -> str:
+    if not item.exists:
+        return "create"
+    if item.is_dir:
+        return "keep"
+    return "overwrite" if overwrite or item.target in overwrite_targets else "skip"

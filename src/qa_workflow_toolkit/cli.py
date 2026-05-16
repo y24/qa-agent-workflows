@@ -5,7 +5,7 @@ from typing import Optional
 
 import typer
 
-from .console import console, print_header, print_plan, print_uninstall_plan, print_usage, print_workflow_list
+from .console import console, print_header, print_plan, print_uninstall_plan, print_usage, print_wiki_init_plan, print_workflow_list
 from .installer import (
     apply_default_actions,
     asset_matches_path,
@@ -17,16 +17,54 @@ from .installer import (
 from .models import CollisionAction, InstallPlanItem, UninstallPlanItem, WorkflowManifest
 from .registry import get_workflow, load_workflows
 from .state import InstalledWorkflow, load_installed_workflows, record_installed_workflows, remove_installed_workflows
+from .wiki import SUPPORTED_WIKI_AGENTS, build_wiki_init_items, init_wiki_from_items
 
 app = typer.Typer(invoke_without_command=True, no_args_is_help=False, add_completion=False)
 workflow_app = typer.Typer(help="Manage QA workflow assets.", no_args_is_help=True, add_completion=False)
+wiki_app = typer.Typer(help="Manage LLM wiki assets.", no_args_is_help=True, add_completion=False)
 app.add_typer(workflow_app, name="workflow")
+app.add_typer(wiki_app, name="wiki")
 
 
 @app.callback()
 def callback(ctx: typer.Context) -> None:
     if ctx.invoked_subcommand is None:
         print_usage()
+
+
+@wiki_app.command("init")
+def init_wiki(
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Wiki name. Defaults to the target folder name."),
+    agent: Optional[str] = typer.Option(None, "--agent", "-a", help="Target agent."),
+    target: Path = typer.Option(Path.cwd(), "--target", "-t", help="Target wiki directory."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Overwrite existing generated files without prompting."),
+) -> None:
+    """Initialize an LLM wiki in a project."""
+    print_header()
+    resolved_target = target.resolve()
+    wiki_name = name or _resolve_wiki_name(resolved_target, yes)
+    selected_agent = agent or _resolve_wiki_agent(yes)
+    if selected_agent not in SUPPORTED_WIKI_AGENTS:
+        raise typer.BadParameter(f"unsupported agent: {selected_agent}")
+    plan = build_wiki_init_items(resolved_target, wiki_name, selected_agent)
+    overwrite = yes
+    overwrite_targets = _resolve_wiki_init_overwrites(plan, yes)
+
+    print_wiki_init_plan(plan, overwrite=overwrite, overwrite_targets=overwrite_targets)
+    if not yes and not _questionary().confirm("Initialize this LLM wiki?", default=True).ask():
+        raise typer.Exit(1)
+
+    result = init_wiki_from_items(plan, overwrite=overwrite, overwrite_targets=overwrite_targets)
+    console.print(f"\n[green]Created {len(result.created)} item(s).[/green]")
+    if result.overwritten:
+        console.print(f"[yellow]Overwritten {len(result.overwritten)} item(s).[/yellow]")
+    if result.skipped:
+        console.print(f"[yellow]Skipped {len(result.skipped)} existing item(s).[/yellow]")
+    console.print("Usage:")
+    console.print("/convert .temp/<file>")
+    console.print("/ingest raw/<file>.md")
+    console.print("/query <質問>")
+    console.print("/lint")
 
 
 @workflow_app.command("list")
@@ -201,6 +239,40 @@ def uninstall(
     console.print(f"\n[green]Removed {len(result.removed)} item(s).[/green]")
     if result.skipped:
         console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
+
+
+def _resolve_wiki_name(target: Path, yes: bool) -> str:
+    default_name = target.name or "llm-wiki"
+    if yes:
+        return default_name
+    selected = _questionary().text("Wiki name", default=default_name).ask()
+    if selected is None:
+        raise typer.Exit(1)
+    return str(selected).strip() or default_name
+
+
+def _resolve_wiki_agent(yes: bool) -> str:
+    default_agent = SUPPORTED_WIKI_AGENTS[0]
+    if yes:
+        return default_agent
+    return _select_agent(SUPPORTED_WIKI_AGENTS, default_agent)
+
+
+def _resolve_wiki_init_overwrites(plan: list, yes: bool) -> set[Path]:
+    if yes:
+        return set()
+
+    agents_md = next((item for item in plan if item.kind == "agents_md"), None)
+    if agents_md is None or not agents_md.target.exists():
+        return set()
+
+    selected = _questionary().confirm(
+        f"{agents_md.target} already exists. Overwrite it with LLM wiki AGENTS.md?",
+        default=False,
+    ).ask()
+    if selected is None:
+        raise typer.Exit(1)
+    return {agents_md.target} if selected else set()
 
 
 def _select_workflow(workflows: list) -> str:
