@@ -22,15 +22,15 @@ pip install -e .
 
 ```bash
 qatool
-qatool list
-qatool install
+qatool workflow list
+qatool workflow install
 ```
 
 非対話で導入する例:
 
 ```bash
-qatool install --workflow scenario-test-design --agent roocode --yes
-qatool install --workflow all --agent roocode --yes
+qatool workflow install --workflow scenario-test-design --agent roocode --yes
+qatool workflow install --workflow all --agent roocode --yes
 ```
 
 ## Installed Layout

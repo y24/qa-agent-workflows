@@ -13,5 +13,5 @@
     "skill": {"source": "workflows/scenario-test-design/skill", "target": ".agents/skills/scenario-test-design"},
     "command": {"source": "commands/roocode/scenario-test-design.md", "target": ".roo/commands/scenario-test-design.md"}
   },
-  "post_install_message": "\nusage:\n/scenario-test-design <入力資料>"
+  "post_install_message": "/scenario-test-design <入力資料>"
 }

@@ -13,5 +13,5 @@
     "skill": {"source": "workflows/spec-extraction/skill", "target": ".agents/skills/spec-extraction"},
     "command": {"source": "commands/roocode/spec-extraction.md", "target": ".roo/commands/spec-extraction.md"}
   },
-  "post_install_message": "\nusage:\n/spec-extraction <入力資料>"
+  "post_install_message": "/spec-extraction <入力資料>"
 }

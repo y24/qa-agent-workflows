@@ -11,6 +11,8 @@ from .models import CollisionAction, InstallPlanItem
 from .registry import get_workflow, load_workflows
 
 app = typer.Typer(invoke_without_command=True, no_args_is_help=False, add_completion=False)
+workflow_app = typer.Typer(help="Manage QA workflow assets.", no_args_is_help=True, add_completion=False)
+app.add_typer(workflow_app, name="workflow")
 
 
 @app.callback()
@@ -19,14 +21,14 @@ def callback(ctx: typer.Context) -> None:
         print_usage()
 
 
-@app.command("list")
+@workflow_app.command("list")
 def list_workflows() -> None:
     """Show available workflows."""
     print_header()
     print_workflow_list(load_workflows())
 
 
-@app.command()
+@workflow_app.command()
 def install(
     workflow: Optional[str] = typer.Option(None, "--workflow", "-w", help="Workflow ID to install, or 'all'."),
     agent: Optional[str] = typer.Option(None, "--agent", "-a", help="Target agent."),
@@ -61,10 +63,11 @@ def install(
     if result.skipped:
         console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
     if selected_workflow_id == "all":
-        console.print("Example prompts:")
+        console.print("Usage:")
         for selected_workflow in selected_workflows:
             console.print(f"/{selected_workflow.command_name} <入力資料>")
     else:
+        console.print("Usage:")
         console.print(selected_workflows[0].post_install_message)
 
 

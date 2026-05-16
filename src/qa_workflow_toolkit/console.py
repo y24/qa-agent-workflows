@@ -43,12 +43,12 @@ def _gradient_color(ratio: float) -> str:
 def print_usage() -> None:
     print_header()
     console.print("[bold]Usage[/bold]")
-    console.print("  qatool install    Install QA workflow assets into current folder")
-    console.print("  qatool list       Show available workflows\n")
+    console.print("  qatool workflow install    Install QA workflow assets into current folder")
+    console.print("  qatool workflow list       Show available workflows\n")
     console.print("[bold]Examples[/bold]")
-    console.print("  qatool install")
-    console.print("  qatool install --workflow scenario-test-design --agent roocode --yes")
-    console.print("  qatool install --workflow all --agent roocode --yes")
+    console.print("  qatool workflow install")
+    console.print("  qatool workflow install --workflow scenario-test-design --agent roocode --yes")
+    console.print("  qatool workflow install --workflow all --agent roocode --yes")
 
 
 def print_workflow_list(workflows: list[WorkflowManifest]) -> None:

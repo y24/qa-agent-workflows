@@ -13,5 +13,5 @@
     "skill": {"source": "workflows/nonfunctional-quality-criteria-planning/skill", "target": ".agents/skills/nonfunctional-quality-criteria-planning"},
     "command": {"source": "commands/roocode/nonfunctional-quality-criteria-planning.md", "target": ".roo/commands/nonfunctional-quality-criteria-planning.md"}
   },
-  "post_install_message": "\nusage:\n/nonfunctional-quality-criteria-planning <入力資料>"
+  "post_install_message": "/nonfunctional-quality-criteria-planning <入力資料>"
 }

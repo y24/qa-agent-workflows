@@ -14,7 +14,7 @@ def test_header_gradient_uses_logo_colors() -> None:
 
 
 def test_list_outputs_workflows_without_table() -> None:
-    result = CliRunner().invoke(app, ["list"])
+    result = CliRunner().invoke(app, ["workflow", "list"])
 
     assert result.exit_code == 0
     assert "___      _       _____ ___" in result.output
@@ -34,6 +34,7 @@ def test_install_outputs_example_prompt() -> None:
         result = CliRunner().invoke(
             app,
             [
+                "workflow",
                 "install",
                 "--workflow",
                 "risk-based-test-design",
