@@ -6,13 +6,12 @@
   "sort_order": 400,
   "skill_name": "testcase-viewpoint-extraction",
   "command_name": "testcase-viewpoint-extraction",
-  "supported_agents": ["roocode"],
   "default_agent": "roocode",
   "install": {
     "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/testcase-viewpoint-extraction/skill", "target": ".agents/skills/testcase-viewpoint-extraction"},
-    "command": {"source": "commands/roocode/testcase-viewpoint-extraction.md", "target": ".roo/commands/testcase-viewpoint-extraction.md"}
+    "command": {"source": "commands/testcase-viewpoint-extraction.md", "target": ".roo/commands/testcase-viewpoint-extraction.md"}
   },
   "post_install_message": "/testcase-viewpoint-extraction <既存テストケース>"
 }

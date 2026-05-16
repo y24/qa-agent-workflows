@@ -5,6 +5,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from .agents import supported_agent_ids
+
 
 class CollisionAction(str, Enum):
     OVERWRITE = "overwrite"
@@ -50,7 +52,6 @@ class WorkflowManifest:
             "version",
             "skill_name",
             "command_name",
-            "supported_agents",
             "default_agent",
             "install",
             "post_install_message",
@@ -68,7 +69,7 @@ class WorkflowManifest:
             sort_order=int(data["sort_order"]) if data.get("sort_order") is not None else None,
             skill_name=str(data["skill_name"]),
             command_name=str(data["command_name"]),
-            supported_agents=tuple(str(agent) for agent in data["supported_agents"]),
+            supported_agents=tuple(str(agent) for agent in data.get("supported_agents") or supported_agent_ids()),
             default_agent=str(data["default_agent"]),
             install=WorkflowInstallSpec(
                 agents_md=bool(install.get("agents_md", True)),

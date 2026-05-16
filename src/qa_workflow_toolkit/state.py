@@ -6,12 +6,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .agents import DEFAULT_AGENT
 from .models import WorkflowManifest
 
 STATE_DIR_NAME = ".qa-toolkit"
 STATE_FILE_NAME = "workflows.json"
 STATE_SCHEMA_VERSION = 1
-DEFAULT_AGENT = "roocode"
 AGENTS_MD_KIND_NONE = "none"
 AGENTS_MD_KIND_WIKI = "wiki"
 AGENTS_MD_KIND_WORKFLOW = "workflow"

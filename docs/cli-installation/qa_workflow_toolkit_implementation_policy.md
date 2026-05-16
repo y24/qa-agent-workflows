@@ -372,7 +372,7 @@ qatool workflow list --installed
   "version": "0.1.0",
   "skill_name": "scenario-test-design",
   "command_name": "scenario-test-design",
-  "supported_agents": ["roocode"],
+  "supported_agents": ["roocode", "claude"],
   "default_agent": "roocode",
   "install": {
     "agents_md": true,
@@ -385,7 +385,7 @@ qatool workflow list --installed
       "target": ".agents/skills/scenario-test-design"
     },
     "command": {
-      "source": "commands/roocode/scenario-test-design.md",
+      "source": "commands/scenario-test-design.md",
       "target": ".roo/commands/scenario-test-design.md"
     }
   },
@@ -451,7 +451,7 @@ assets/workflow/shared/**
 assets/workflow/workflows/<workflow>/skill/**
   → .agents/skills/<workflow>/**
 
-assets/workflow/commands/roocode/<workflow>.md
+assets/workflow/commands/<workflow>.md
   → .roo/commands/<workflow>.md
 ```
 
@@ -588,7 +588,7 @@ Skip       既存のsharedを維持する
 
 ## 14. slash command設計
 
-RooCode用の slash command は `.roo/commands/<workflow>.md` に配置する。
+Slash command は選択したagentのcommandsディレクトリに配置する。
 
 例: `.roo/commands/scenario-test-design.md`
 
@@ -754,7 +754,7 @@ AGENTS.md
 
 ```text
 assets/workflow/workflows/scenario-test-design/skill/
-assets/workflow/commands/roocode/scenario-test-design.md
+assets/workflow/commands/scenario-test-design.md
 assets/workflow/shared/
 assets/workflow/agents/roocode/AGENTS.md
 ```
@@ -955,6 +955,6 @@ AGENTS.md
 
 共通方針は `.agents/shared/` に集約し、個別ワークフローは `.agents/skills/<workflow>/` に配置する。
 
-RooCodeのslash commandは `.roo/commands/<workflow>.md` に置き、skillを呼び出す薄い入口として扱う。
+Slash commandは選択したagentのcommandsディレクトリに置き、skillを呼び出す薄い入口として扱う。
 
 この構成により、既存のQAワークフロー資産を活かしつつ、将来的なワークフロー追加や他エージェント対応にも拡張しやすいCLIツールにできる。

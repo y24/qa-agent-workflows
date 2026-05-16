@@ -6,13 +6,12 @@
   "sort_order": 600,
   "skill_name": "test-design-review",
   "command_name": "test-design-review",
-  "supported_agents": ["roocode"],
   "default_agent": "roocode",
   "install": {
     "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/test-design-review/skill", "target": ".agents/skills/test-design-review"},
-    "command": {"source": "commands/roocode/test-design-review.md", "target": ".roo/commands/test-design-review.md"}
+    "command": {"source": "commands/test-design-review.md", "target": ".roo/commands/test-design-review.md"}
   },
   "post_install_message": "/test-design-review <レビュー対象>"
 }

@@ -10,7 +10,7 @@
 
 QA業務向けAI agent workflow assetsを、対象プロジェクトへ配置するインストーラCLIです。
 
-`qatool` 自身はワークフローを実行しません。RooCodeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/`、`.roo/commands/` をカレントディレクトリに配置します。
+`qatool` 自身はワークフローを実行しません。RooCodeやClaudeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/`、agent別のcommandsをカレントディレクトリに配置します。
 
 ## Installation
 
@@ -34,6 +34,7 @@ qatool workflow uninstall
 ```bash
 qatool wiki init --name research-notes --agent roocode --yes
 qatool workflow install --workflow scenario-test-design --agent roocode --yes
+qatool workflow install --workflow scenario-test-design --agent claude --yes
 qatool workflow install --workflow all --agent roocode --yes
 qatool workflow update --workflow all --agent roocode --yes
 qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
@@ -43,7 +44,7 @@ qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
 
 `qatool wiki init` は、LLMが保守するMarkdown wikiの初期状態をカレントディレクトリに作成します。
 対話実行ではwiki名を入力します。未入力のままEnterすると、対象ディレクトリ名を使います。
-agent選択は現在 `roocode` のみです。
+agent選択は `roocode` と `claude` に対応しています。commandの配置先は `roocode` では `.roo/commands/`、`claude` では `.claude/commands/` です。
 
 作成される主なファイルとディレクトリ:
 
@@ -61,7 +62,7 @@ target-project/
 │     ├─ query/
 │     ├─ lint/
 │     └─ convert/
-└─ .roo/
+└─ <agent-command-dir>/
    └─ commands/
       ├─ ingest.md
       ├─ query.md
@@ -69,7 +70,7 @@ target-project/
       └─ convert.md
 ```
 
-RooCodeでは `/convert`、`/ingest`、`/query`、`/lint` を利用できます。
+導入先のagentでは `/convert`、`/ingest`、`/query`、`/lint` を利用できます。
 `/convert` は `.temp/` に置いた変換前ファイルを `markitdown` コマンドでMarkdown化し、`raw/` に配置するためのcommandです。
 
 ## Installed Layout
@@ -80,11 +81,11 @@ target-project/
 ├─ .agents/
 │  ├─ shared/
 │  └─ skills/
-└─ .roo/
+└─ <agent-command-dir>/
    └─ commands/
 ```
 
-RooCodeでは `/scenario-test-design docsフォルダの資料を参照してシナリオテストを設計して` のように slash command を実行します。
+導入先のagentでは `/scenario-test-design docsフォルダの資料を参照してシナリオテストを設計して` のように slash command を実行します。
 
 既存ファイルがある場合、対話実行では上書き、スキップ、`AGENTS.md` の別名作成を選択できます。`--yes` 指定時は既存ファイルを上書きします。
 
@@ -92,6 +93,6 @@ RooCodeでは `/scenario-test-design docsフォルダの資料を参照してシ
 
 `workflow update` はインストール時に `.qa-toolkit/workflows.json` へ保存した workflow 名、リポジトリ単位の agent 種別、`AGENTS.md` 作成有無を参照し、インストール済みworkflowを現在のpackage assetsで更新します。更新対象のうち差分がない項目はplanに表示せず、差分がある項目だけをまとめて上書きします。
 
-`workflow uninstall` はpackage assetsと完全一致するworkflow固有の `.agents/skills/<workflow>/` と `.roo/commands/<workflow>.md` を削除します。手動編集済みのファイルは削除せず、`--workflow all` の場合のみ共有ファイルも削除候補にします。
+`workflow uninstall` はpackage assetsと完全一致するworkflow固有の `.agents/skills/<workflow>/` と agent別commandファイルを削除します。手動編集済みのファイルは削除せず、`--workflow all` の場合のみ共有ファイルも削除候補にします。
 
 workflow一覧の表示順は、各 `src/qa_workflow_toolkit/assets/workflow/workflows/<workflow>/workflow.json` の `sort_order` で制御します。未指定のworkflowは、`sort_order` 指定済みworkflowの後ろにID順で表示されます。

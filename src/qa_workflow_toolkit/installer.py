@@ -5,6 +5,7 @@ from pathlib import Path
 
 from importlib.resources.abc import Traversable
 
+from .agents import get_agent_spec
 from .models import CollisionAction, InstallPlanItem, InstallResult, UninstallPlanItem, UninstallResult, WorkflowManifest
 from .paths import workflow_asset_path
 
@@ -18,13 +19,14 @@ def build_install_plan(
     if agent not in workflow.supported_agents:
         raise ValueError(f"{workflow.id} does not support agent: {agent}")
 
+    agent_spec = get_agent_spec(agent)
     items: list[InstallPlanItem] = []
     if include_agents_md and workflow.install.agents_md:
-        items.append(_plan_item("agents_md", f"agents/{agent}/AGENTS.md", target_dir / "AGENTS.md"))
+        items.append(_plan_item("agents_md", agent_spec.agents_md_source, target_dir / "AGENTS.md"))
 
     items.append(_plan_item("shared", workflow.install.shared.source, target_dir / workflow.install.shared.target))
     items.append(_plan_item("skill", workflow.install.skill.source, target_dir / workflow.install.skill.target))
-    items.append(_plan_item("command", workflow.install.command.source, target_dir / workflow.install.command.target))
+    items.append(_plan_item("command", workflow.install.command.source, _command_target(workflow, target_dir, agent)))
     return items
 
 
@@ -83,15 +85,21 @@ def build_uninstall_plan(
     if agent not in workflow.supported_agents:
         raise ValueError(f"{workflow.id} does not support agent: {agent}")
 
+    agent_spec = get_agent_spec(agent)
     items: list[UninstallPlanItem] = []
     if include_agents_md and workflow.install.agents_md:
-        items.append(_uninstall_plan_item("agents_md", f"agents/{agent}/AGENTS.md", target_dir / "AGENTS.md"))
+        items.append(_uninstall_plan_item("agents_md", agent_spec.agents_md_source, target_dir / "AGENTS.md"))
     if include_shared:
         items.append(_uninstall_plan_item("shared", workflow.install.shared.source, target_dir / workflow.install.shared.target))
 
     items.append(_uninstall_plan_item("skill", workflow.install.skill.source, target_dir / workflow.install.skill.target))
-    items.append(_uninstall_plan_item("command", workflow.install.command.source, target_dir / workflow.install.command.target))
+    items.append(_uninstall_plan_item("command", workflow.install.command.source, _command_target(workflow, target_dir, agent)))
     return items
+
+
+def _command_target(workflow: WorkflowManifest, target_dir: Path, agent: str) -> Path:
+    agent_spec = get_agent_spec(agent)
+    return target_dir / agent_spec.command_target_dir / f"{workflow.command_name}.md"
 
 
 def uninstall_from_plan(plan: list[UninstallPlanItem]) -> UninstallResult:

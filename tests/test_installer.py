@@ -15,6 +15,7 @@ from qa_workflow_toolkit.installer import (
 )
 from qa_workflow_toolkit.models import CollisionAction
 from qa_workflow_toolkit.registry import get_workflow
+from qa_workflow_toolkit.wiki import build_wiki_init_items
 
 
 @pytest.fixture()
@@ -35,6 +36,22 @@ def test_build_install_plan_for_scenario_test_design(workspace_tmp: Path) -> Non
     assert plan[0].target == workspace_tmp / "AGENTS.md"
     assert plan[2].target == workspace_tmp / ".agents" / "skills" / "scenario-test-design"
     assert plan[3].target == workspace_tmp / ".roo" / "commands" / "scenario-test-design.md"
+
+
+def test_build_install_plan_uses_agent_specific_command_target(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    plan = build_install_plan(workflow, workspace_tmp, "claude")
+
+    assert plan[3].source == "commands/scenario-test-design.md"
+    assert plan[3].target == workspace_tmp / ".claude" / "commands" / "scenario-test-design.md"
+
+
+def test_build_wiki_init_items_uses_agent_specific_command_target(workspace_tmp: Path) -> None:
+    items = build_wiki_init_items(workspace_tmp, "research-notes", "claude")
+    command_targets = {item.target for item in items if item.kind == "command"}
+
+    assert workspace_tmp / ".claude" / "commands" / "ingest.md" in command_targets
+    assert workspace_tmp / ".roo" / "commands" / "ingest.md" not in command_targets
 
 
 def test_build_install_plan_can_skip_agents_md(workspace_tmp: Path) -> None:

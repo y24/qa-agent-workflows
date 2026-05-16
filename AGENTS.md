@@ -2,7 +2,7 @@
 
 このリポジトリは、QA業務向けの再利用可能な AI agent workflow assets を対象プロジェクトへ配置する `qa-workflow-toolkit` CLI のプロジェクトです。
 
-`qatool` はワークフローを直接実行しません。RooCodeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/<workflow>/`、`.roo/commands/<workflow>.md` をインストールすることに責務を限定します。
+`qatool` はワークフローを直接実行しません。RooCodeやClaudeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/<workflow>/`、agent別のcommandsをインストールすることに責務を限定します。
 
 ## Common Working Rules
 
@@ -43,7 +43,7 @@ qa-agent-workflows/
           workflows/<workflow>/
             workflow.json
             skill/
-          commands/roocode/<workflow>.md
+          commands/<workflow>.md
   tests/
   docs/
     skill-authoring/

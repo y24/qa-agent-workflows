@@ -6,13 +6,12 @@
   "sort_order": 500,
   "skill_name": "defect-analysis",
   "command_name": "defect-analysis",
-  "supported_agents": ["roocode"],
   "default_agent": "roocode",
   "install": {
     "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/defect-analysis/skill", "target": ".agents/skills/defect-analysis"},
-    "command": {"source": "commands/roocode/defect-analysis.md", "target": ".roo/commands/defect-analysis.md"}
+    "command": {"source": "commands/defect-analysis.md", "target": ".roo/commands/defect-analysis.md"}
   },
   "post_install_message": "/defect-analysis <不具合チケット>"
 }

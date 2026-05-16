@@ -16,5 +16,5 @@
 
 ## Available Workflow Assets
 
-RooCodeの slash command は `.roo/commands/` に配置される。
-各commandは対応する `.agents/skills/<workflow>/SKILL.md` を入口として使用する。
+Slash command は選択した agent の command ディレクトリに配置される。
+各 command は対応する `.agents/skills/<workflow>/SKILL.md` を入口として使用する。

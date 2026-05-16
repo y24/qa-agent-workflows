@@ -6,13 +6,12 @@
   "sort_order": 300,
   "skill_name": "spec-extraction",
   "command_name": "spec-extraction",
-  "supported_agents": ["roocode"],
   "default_agent": "roocode",
   "install": {
     "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/spec-extraction/skill", "target": ".agents/skills/spec-extraction"},
-    "command": {"source": "commands/roocode/spec-extraction.md", "target": ".roo/commands/spec-extraction.md"}
+    "command": {"source": "commands/spec-extraction.md", "target": ".roo/commands/spec-extraction.md"}
   },
   "post_install_message": "/spec-extraction <入力資料>"
 }

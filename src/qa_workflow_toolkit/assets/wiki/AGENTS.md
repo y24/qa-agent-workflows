@@ -13,7 +13,7 @@
 - `index.md`: wiki全体の内容索引。ingestやqueryの前に最初に確認する。
 - `log.md`: ingest、query、lint、convertの時系列ログ。追記専用で扱う。
 - `.agents/skills/`: 操作用skill。
-- `.roo/commands/`: RooCode用slash command。
+- agent別commands: slash command。
 
 ## 基本方針
 

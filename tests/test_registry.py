@@ -30,9 +30,10 @@ def test_manifest_contains_install_targets() -> None:
 
     assert workflow.sort_order == 100
     assert workflow.default_agent == "roocode"
+    assert workflow.supported_agents == ("roocode", "claude")
     assert workflow.install.shared.target == ".agents/shared"
     assert workflow.install.skill.target == ".agents/skills/scenario-test-design"
-    assert workflow.install.command.target == ".roo/commands/scenario-test-design.md"
+    assert workflow.install.command.source == "commands/scenario-test-design.md"
 
 
 def test_workflows_without_sort_order_sort_after_ordered_workflows_by_id() -> None:
@@ -58,13 +59,12 @@ def _workflow_from_dict(workflow_id: str, sort_order: int | None = None) -> Work
         "version": "0.1.0",
         "skill_name": workflow_id,
         "command_name": workflow_id,
-        "supported_agents": ["roocode"],
         "default_agent": "roocode",
         "install": {
             "agents_md": True,
             "shared": {"source": "shared", "target": ".agents/shared"},
             "skill": {"source": f"workflows/{workflow_id}/skill", "target": f".agents/skills/{workflow_id}"},
-            "command": {"source": f"commands/roocode/{workflow_id}.md", "target": f".roo/commands/{workflow_id}.md"},
+            "command": {"source": f"commands/{workflow_id}.md", "target": f".roo/commands/{workflow_id}.md"},
         },
         "post_install_message": f"/{workflow_id} <入力資料>",
     }

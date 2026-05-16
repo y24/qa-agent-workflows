@@ -5,6 +5,7 @@ from typing import Optional
 
 import typer
 
+from .agents import get_agent_spec
 from .console import console, print_header, print_plan, print_uninstall_plan, print_usage, print_wiki_init_plan, print_workflow_list
 from .installer import (
     apply_default_actions,
@@ -354,7 +355,7 @@ def _resolve_agents_md_choice(
             return saved_include_agents_md
     if yes:
         return True
-    if asset_matches_path(f"agents/{agent}/AGENTS.md", target / "AGENTS.md"):
+    if asset_matches_path(get_agent_spec(agent).agents_md_source, target / "AGENTS.md"):
         return True
 
     selected = _questionary().confirm(

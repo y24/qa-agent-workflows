@@ -6,13 +6,12 @@
   "sort_order": 700,
   "skill_name": "nonfunctional-quality-criteria-planning",
   "command_name": "nonfunctional-quality-criteria-planning",
-  "supported_agents": ["roocode"],
   "default_agent": "roocode",
   "install": {
     "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/nonfunctional-quality-criteria-planning/skill", "target": ".agents/skills/nonfunctional-quality-criteria-planning"},
-    "command": {"source": "commands/roocode/nonfunctional-quality-criteria-planning.md", "target": ".roo/commands/nonfunctional-quality-criteria-planning.md"}
+    "command": {"source": "commands/nonfunctional-quality-criteria-planning.md", "target": ".roo/commands/nonfunctional-quality-criteria-planning.md"}
   },
   "post_install_message": "/nonfunctional-quality-criteria-planning <入力資料>"
 }

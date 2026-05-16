@@ -3,10 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from .agents import get_agent_spec, supported_agent_ids
 from .paths import asset_path
 
 
-SUPPORTED_WIKI_AGENTS = ("roocode",)
+SUPPORTED_WIKI_AGENTS = supported_agent_ids()
 WIKI_OPERATIONS = ("ingest", "query", "lint", "convert")
 
 
@@ -33,6 +34,7 @@ def build_wiki_init_items(target_dir: Path, wiki_name: str, agent: str) -> list[
     if agent not in SUPPORTED_WIKI_AGENTS:
         raise ValueError(f"unsupported wiki agent: {agent}")
 
+    agent_spec = get_agent_spec(agent)
     items = [
         WikiInitItem("agents_md", target_dir / "AGENTS.md", _template("wiki/AGENTS.md", wiki_name=wiki_name)),
         WikiInitItem("raw_dir", target_dir / "raw", is_dir=True),
@@ -48,8 +50,8 @@ def build_wiki_init_items(target_dir: Path, wiki_name: str, agent: str) -> list[
         items.append(
             WikiInitItem(
                 "command",
-                target_dir / ".roo" / "commands" / f"{operation}.md",
-                _template(f"wiki/commands/{agent}/{operation}.md"),
+                target_dir / agent_spec.command_target_dir / f"{operation}.md",
+                _template(f"wiki/commands/{operation}.md"),
             )
         )
         items.append(
