@@ -5,12 +5,19 @@ import uuid
 from typer.testing import CliRunner
 
 from qa_workflow_toolkit.cli import app
+from qa_workflow_toolkit.console import _gradient_color
+
+
+def test_header_gradient_uses_logo_colors() -> None:
+    assert _gradient_color(0) == "#ff0d4f"
+    assert _gradient_color(1) == "#f2a073"
 
 
 def test_list_outputs_workflows_without_table() -> None:
     result = CliRunner().invoke(app, ["list"])
 
     assert result.exit_code == 0
+    assert "___      _       _____ ___" in result.output
     assert "Available workflows" in result.output
     assert "test-design - テスト設計" not in result.output
     assert "scenario-test-design - シナリオテスト設計" in result.output
