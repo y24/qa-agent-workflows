@@ -96,6 +96,8 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         assert (target / ".agents" / "skills" / "ingest" / "SKILL.md").is_file()
         metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
         assert metadata["agent"] == "roocode"
+        assert metadata["include_agents_md"] is False
+        assert metadata["agents_md_kind"] == "wiki"
         assert metadata["workflows"] == []
         assert "Research Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
         assert 'markitdown "<input>" -o "<output>"' in (
@@ -167,11 +169,72 @@ def test_workflow_install_reuses_agent_recorded_by_wiki_init(monkeypatch: pytest
         shutil.rmtree(target, ignore_errors=True)
 
 
+def test_workflow_uninstall_keeps_wiki_agents_md_when_state_identifies_it_as_wiki() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-agents-uninstall-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        wiki_result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--name",
+                "Shared Wiki",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        install_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--no-agents-md",
+                "--yes",
+            ],
+        )
+        uninstall_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "uninstall",
+                "--workflow",
+                "scenario-test-design",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+
+        assert wiki_result.exit_code == 0
+        assert install_result.exit_code == 0
+        assert uninstall_result.exit_code == 0
+        assert "AGENTS.md" not in uninstall_result.output
+        assert (target / "AGENTS.md").is_file()
+        assert "Shared Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
+        assert metadata["agents_md_kind"] == "wiki"
+        assert metadata["workflows"] == []
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
 def test_wiki_init_prompts_before_overwriting_existing_agents_md(monkeypatch: pytest.MonkeyPatch) -> None:
     target = Path("work") / "test-tmp" / f"qatool-wiki-existing-agents-{uuid.uuid4().hex}"
     target.mkdir(parents=True)
     (target / "AGENTS.md").write_text("existing instructions", encoding="utf-8")
     confirm_messages: list[str] = []
+    confirm_defaults: list[bool] = []
 
     class ConfirmPrompt:
         def __init__(self, message: str) -> None:
@@ -184,6 +247,7 @@ def test_wiki_init_prompts_before_overwriting_existing_agents_md(monkeypatch: py
     class FakeQuestionary:
         @staticmethod
         def confirm(message: str, default: bool = True) -> ConfirmPrompt:
+            confirm_defaults.append(default)
             return ConfirmPrompt(message)
 
     try:
@@ -208,6 +272,7 @@ def test_wiki_init_prompts_before_overwriting_existing_agents_md(monkeypatch: py
             f"{target.resolve()}\\AGENTS.md already exists. Overwrite it with LLM wiki AGENTS.md?",
             "Initialize this LLM wiki?",
         ]
+        assert confirm_defaults == [True, True]
         assert "Overwritten 1 item(s)." in result.output
         assert "Existing Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
     finally:

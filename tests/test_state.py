@@ -6,6 +6,7 @@ import uuid
 import pytest
 
 from qa_workflow_toolkit.state import (
+    AGENTS_MD_KIND_WIKI,
     InstalledWorkflow,
     load_installed_workflows,
     load_repository_config,
@@ -117,13 +118,17 @@ def test_load_installed_workflows_reads_top_level_agent_config(workspace_tmp) ->
 
 
 def test_record_repository_config_can_store_agent_without_workflows(workspace_tmp) -> None:
-    record_repository_config(workspace_tmp, "roocode")
+    record_repository_config(workspace_tmp, "roocode", include_agents_md=False, agents_md_kind=AGENTS_MD_KIND_WIKI)
 
     data = json.loads((workspace_tmp / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
     config = load_repository_config(workspace_tmp)
 
     assert data["agent"] == "roocode"
+    assert data["include_agents_md"] is False
+    assert data["agents_md_kind"] == "wiki"
     assert data["workflows"] == []
     assert config is not None
     assert config.agent == "roocode"
+    assert config.include_agents_md is False
+    assert config.agents_md_kind == "wiki"
     assert load_installed_workflows(workspace_tmp) == {}

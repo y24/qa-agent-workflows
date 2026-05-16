@@ -17,6 +17,7 @@ from .installer import (
 from .models import CollisionAction, InstallPlanItem, UninstallPlanItem, WorkflowManifest
 from .registry import get_workflow, load_workflows
 from .state import (
+    AGENTS_MD_KIND_WIKI,
     InstalledWorkflow,
     RepositoryConfig,
     load_installed_workflows,
@@ -64,7 +65,7 @@ def init_wiki(
         raise typer.Exit(1)
 
     result = init_wiki_from_items(plan, overwrite=overwrite, overwrite_targets=overwrite_targets)
-    record_repository_config(resolved_target, selected_agent)
+    record_repository_config(resolved_target, selected_agent, include_agents_md=False, agents_md_kind=AGENTS_MD_KIND_WIKI)
     console.print(f"\n[green]Created {len(result.created)} item(s).[/green]")
     if result.overwritten:
         console.print(f"[yellow]Overwritten {len(result.overwritten)} item(s).[/yellow]")
@@ -287,7 +288,7 @@ def _resolve_wiki_init_overwrites(plan: list, yes: bool) -> set[Path]:
 
     selected = _questionary().confirm(
         f"{agents_md.target} already exists. Overwrite it with LLM wiki AGENTS.md?",
-        default=False,
+        default=True,
     ).ask()
     if selected is None:
         raise typer.Exit(1)
