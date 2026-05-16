@@ -56,6 +56,28 @@ def test_install_copies_assets(workspace_tmp: Path) -> None:
     assert (workspace_tmp / ".roo" / "commands" / "scenario-test-design.md").is_file()
 
 
+def test_build_install_plan_marks_matching_existing_assets_as_no_change(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    initial_plan = apply_default_actions(build_install_plan(workflow, workspace_tmp, "roocode"), CollisionAction.OVERWRITE)
+    install_from_plan(initial_plan)
+
+    plan = build_install_plan(workflow, workspace_tmp, "roocode")
+
+    assert {item.action for item in plan} == {CollisionAction.NO_CHANGE}
+
+
+def test_install_skips_no_change_items(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    initial_plan = apply_default_actions(build_install_plan(workflow, workspace_tmp, "roocode"), CollisionAction.OVERWRITE)
+    install_from_plan(initial_plan)
+    plan = build_install_plan(workflow, workspace_tmp, "roocode")
+
+    result = install_from_plan(plan)
+
+    assert result.copied == ()
+    assert len(result.skipped) == 4
+
+
 def test_next_available_agents_path(workspace_tmp: Path) -> None:
     (workspace_tmp / "AGENTS.md").write_text("existing", encoding="utf-8")
     (workspace_tmp / "AGENTS_1.md").write_text("existing", encoding="utf-8")

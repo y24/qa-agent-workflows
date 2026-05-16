@@ -36,7 +36,11 @@ def apply_default_actions(plan: list[InstallPlanItem], action: CollisionAction) 
             target=item.target,
             exists=item.exists,
             is_dir=item.is_dir,
-            action=action if item.exists else CollisionAction.OVERWRITE,
+            action=(
+                item.action
+                if item.action == CollisionAction.NO_CHANGE
+                else action if item.exists else CollisionAction.OVERWRITE
+            ),
         )
         for item in plan
     ]
@@ -49,6 +53,10 @@ def install_from_plan(plan: list[InstallPlanItem]) -> InstallResult:
 
     for item in plan:
         action = item.action or (CollisionAction.SKIP if item.exists else CollisionAction.OVERWRITE)
+        if action == CollisionAction.NO_CHANGE:
+            skipped.append(item.target)
+            continue
+
         if item.exists and action == CollisionAction.SKIP:
             skipped.append(item.target)
             continue
@@ -73,16 +81,25 @@ def next_available_agents_path(path: Path) -> Path:
     raise RuntimeError(f"could not find available filename for {path}")
 
 
+def asset_matches_path(source: str, target: Path) -> bool:
+    source_resource = asset_path(source)
+    if not source_resource.exists():
+        raise FileNotFoundError(f"asset not found: {source}")
+    return target.exists() and _resource_matches_path(source_resource, target)
+
+
 def _plan_item(kind: str, source: str, target: Path) -> InstallPlanItem:
     source_resource = asset_path(source)
     if not source_resource.exists():
         raise FileNotFoundError(f"asset not found: {source}")
+    action = CollisionAction.NO_CHANGE if asset_matches_path(source, target) else None
     return InstallPlanItem(
         kind=kind,
         source=source,
         target=target,
         exists=target.exists(),
         is_dir=source_resource.is_dir(),
+        action=action,
     )
 
 
@@ -100,3 +117,16 @@ def _copy_resource(source: Traversable, target: Path, overwrite: bool) -> None:
         return
     with source.open("rb") as input_file, target.open("wb") as output_file:
         shutil.copyfileobj(input_file, output_file)
+
+
+def _resource_matches_path(source: Traversable, target: Path) -> bool:
+    if source.is_dir():
+        if not target.is_dir():
+            return False
+        source_children = sorted(source.iterdir(), key=lambda child: child.name)
+        return all(_resource_matches_path(source_child, target / source_child.name) for source_child in source_children)
+
+    if not target.is_file():
+        return False
+    with source.open("rb") as source_file, target.open("rb") as target_file:
+        return source_file.read() == target_file.read()

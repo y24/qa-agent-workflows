@@ -2,10 +2,14 @@ from pathlib import Path
 import shutil
 import uuid
 
+import pytest
 from typer.testing import CliRunner
 
-from qa_workflow_toolkit.cli import app
+from qa_workflow_toolkit.cli import _resolve_agents_md_choice, app
 from qa_workflow_toolkit.console import _gradient_color
+from qa_workflow_toolkit.installer import apply_default_actions, build_install_plan, install_from_plan
+from qa_workflow_toolkit.models import CollisionAction
+from qa_workflow_toolkit.registry import get_workflow
 
 
 def test_header_gradient_uses_logo_colors() -> None:
@@ -83,5 +87,65 @@ def test_install_can_skip_agents_md() -> None:
         assert (target / ".agents" / "shared" / "common_contract.md").is_file()
         assert (target / ".agents" / "skills" / "risk-based-test-design" / "SKILL.md").is_file()
         assert (target / ".roo" / "commands" / "risk-based-test-design.md").is_file()
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_install_outputs_no_change_for_matching_existing_assets() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        first_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        second_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        assert first_result.exit_code == 0
+        assert second_result.exit_code == 0
+        assert "no change" in second_result.output
+        assert "Installed 0 item(s)." in second_result.output
+        assert "Skipped 4 item(s)." in second_result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_agents_md_choice_skips_prompt_when_existing_file_matches(monkeypatch: pytest.MonkeyPatch) -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        workflow = get_workflow("scenario-test-design")
+        plan = apply_default_actions(build_install_plan(workflow, target, "roocode"), CollisionAction.OVERWRITE)
+        install_from_plan(plan)
+
+        def fail_questionary():
+            raise AssertionError("questionary should not be called for matching AGENTS.md")
+
+        monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", fail_questionary)
+
+        assert _resolve_agents_md_choice(None, False, target, "roocode") is True
     finally:
         shutil.rmtree(target, ignore_errors=True)

@@ -6,7 +6,7 @@ from typing import Optional
 import typer
 
 from .console import console, print_header, print_plan, print_usage, print_workflow_list
-from .installer import apply_default_actions, build_install_plan, install_from_plan
+from .installer import apply_default_actions, asset_matches_path, build_install_plan, install_from_plan
 from .models import CollisionAction, InstallPlanItem
 from .registry import get_workflow, load_workflows
 
@@ -48,14 +48,15 @@ def install(
     default_agent = selected_workflows[0].default_agent
     supported_agents = tuple(sorted(set.intersection(*(set(item.supported_agents) for item in selected_workflows))))
     selected_agent = agent or _select_agent(supported_agents, default_agent)
-    include_agents_md = _resolve_agents_md_choice(agents_md, yes)
+    resolved_target = target.resolve()
+    include_agents_md = _resolve_agents_md_choice(agents_md, yes, resolved_target, selected_agent)
 
     plan = _dedupe_plan(
         item
         for selected_workflow in selected_workflows
         for item in build_install_plan(
             selected_workflow,
-            target.resolve(),
+            resolved_target,
             selected_agent,
             include_agents_md=include_agents_md,
         )
@@ -100,10 +101,12 @@ def _select_agent(supported_agents: tuple[str, ...], default_agent: str) -> str:
     return str(selected)
 
 
-def _resolve_agents_md_choice(agents_md: Optional[bool], yes: bool) -> bool:
+def _resolve_agents_md_choice(agents_md: Optional[bool], yes: bool, target: Path, agent: str) -> bool:
     if agents_md is not None:
         return agents_md
     if yes:
+        return True
+    if asset_matches_path(f"agents/{agent}/AGENTS.md", target / "AGENTS.md"):
         return True
 
     selected = _questionary().confirm(
@@ -117,6 +120,8 @@ def _resolve_agents_md_choice(agents_md: Optional[bool], yes: bool) -> bool:
 
 def _resolve_collision(item: InstallPlanItem) -> InstallPlanItem:
     questionary = _questionary()
+    if item.action == CollisionAction.NO_CHANGE:
+        return item
     if not item.exists:
         return InstallPlanItem(item.kind, item.source, item.target, item.exists, item.is_dir, CollisionAction.OVERWRITE)
 

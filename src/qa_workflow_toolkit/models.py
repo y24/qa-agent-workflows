@@ -10,6 +10,7 @@ class CollisionAction(str, Enum):
     OVERWRITE = "overwrite"
     SKIP = "skip"
     RENAME = "rename"
+    NO_CHANGE = "no change"
 
 
 @dataclass(frozen=True)
