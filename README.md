@@ -2,7 +2,7 @@
 
 QA業務向けAI agent workflow assetsを、対象プロジェクトへ配置するインストーラCLIです。
 
-`qatool` はワークフローを実行しません。RooCodeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/`、`.roo/commands/` をコピーします。
+`qatool` 自身はワークフローを実行しません。RooCodeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/`、`.roo/commands/` をカレントディレクトリに配置します。
 
 ## Installation
 
