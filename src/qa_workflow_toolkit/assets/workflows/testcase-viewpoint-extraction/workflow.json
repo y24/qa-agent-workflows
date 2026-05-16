@@ -3,6 +3,7 @@
   "display_name": "テストケース観点抽出",
   "description": "既存テストケースから意図、抽象テスト観点、観点カタログ、トレーサビリティを抽出する",
   "version": "0.1.0",
+  "sort_order": 400,
   "skill_name": "testcase-viewpoint-extraction",
   "command_name": "testcase-viewpoint-extraction",
   "supported_agents": ["roocode"],

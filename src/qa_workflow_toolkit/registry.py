@@ -6,6 +6,12 @@ from .models import WorkflowManifest
 from .paths import asset_path
 
 
+def _workflow_sort_key(workflow: WorkflowManifest) -> tuple[int, int, str]:
+    if workflow.sort_order is None:
+        return (1, 0, workflow.id)
+    return (0, workflow.sort_order, workflow.id)
+
+
 def load_workflows() -> list[WorkflowManifest]:
     workflows_root = asset_path("workflows")
     manifests: list[WorkflowManifest] = []
@@ -17,7 +23,7 @@ def load_workflows() -> list[WorkflowManifest]:
             continue
         with manifest_path.open("r", encoding="utf-8") as handle:
             manifests.append(WorkflowManifest.from_dict(json.load(handle)))
-    return sorted(manifests, key=lambda workflow: workflow.id)
+    return sorted(manifests, key=_workflow_sort_key)
 
 
 def get_workflow(workflow_id: str) -> WorkflowManifest:

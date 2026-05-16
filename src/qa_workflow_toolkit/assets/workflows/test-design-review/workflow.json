@@ -3,6 +3,7 @@
   "display_name": "テスト設計レビュー",
   "description": "既存のテスト設計書、観点表、テストケース一覧を根拠付きでレビューする",
   "version": "0.1.0",
+  "sort_order": 600,
   "skill_name": "test-design-review",
   "command_name": "test-design-review",
   "supported_agents": ["roocode"],

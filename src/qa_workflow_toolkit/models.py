@@ -33,6 +33,7 @@ class WorkflowManifest:
     display_name: str
     description: str
     version: str
+    sort_order: int | None
     skill_name: str
     command_name: str
     supported_agents: tuple[str, ...]
@@ -64,6 +65,7 @@ class WorkflowManifest:
             display_name=str(data["display_name"]),
             description=str(data["description"]),
             version=str(data["version"]),
+            sort_order=int(data["sort_order"]) if data.get("sort_order") is not None else None,
             skill_name=str(data["skill_name"]),
             command_name=str(data["command_name"]),
             supported_agents=tuple(str(agent) for agent in data["supported_agents"]),

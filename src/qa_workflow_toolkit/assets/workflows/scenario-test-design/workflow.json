@@ -3,6 +3,7 @@
   "display_name": "シナリオテスト設計",
   "description": "要件、業務フロー、画面仕様、ドメインルールからシナリオテストを設計する",
   "version": "0.1.0",
+  "sort_order": 100,
   "skill_name": "scenario-test-design",
   "command_name": "scenario-test-design",
   "supported_agents": ["roocode"],

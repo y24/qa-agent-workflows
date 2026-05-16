@@ -3,6 +3,7 @@
   "display_name": "リスクベーステスト設計",
   "description": "リスク候補の抽出、評価、優先度付け、リスクベースのテスト方針とテストケース骨子を作る",
   "version": "0.1.0",
+  "sort_order": 200,
   "skill_name": "risk-based-test-design",
   "command_name": "risk-based-test-design",
   "supported_agents": ["roocode"],

@@ -3,6 +3,7 @@
   "display_name": "不具合分析",
   "description": "不具合チケットから事実抽出、分類・傾向分析、品質リスク化、後続テスト設計向け示唆を作る",
   "version": "0.1.0",
+  "sort_order": 500,
   "skill_name": "defect-analysis",
   "command_name": "defect-analysis",
   "supported_agents": ["roocode"],
