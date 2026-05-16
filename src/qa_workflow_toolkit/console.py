@@ -22,7 +22,7 @@ def print_usage() -> None:
     console.print("  qatool list       Show available workflows\n")
     console.print("[bold]Examples[/bold]")
     console.print("  qatool install")
-    console.print("  qatool install --workflow test-design --agent roocode --yes")
+    console.print("  qatool install --workflow scenario-test-design --agent roocode --yes")
     console.print("  qatool install --workflow all --agent roocode --yes")
 
 

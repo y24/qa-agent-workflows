@@ -24,18 +24,18 @@ def workspace_tmp() -> Path:
         shutil.rmtree(path, ignore_errors=True)
 
 
-def test_build_install_plan_for_test_design(workspace_tmp: Path) -> None:
-    workflow = get_workflow("test-design")
+def test_build_install_plan_for_scenario_test_design(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
     plan = build_install_plan(workflow, workspace_tmp, "roocode")
 
     assert [item.kind for item in plan] == ["agents_md", "shared", "skill", "command"]
     assert plan[0].target == workspace_tmp / "AGENTS.md"
-    assert plan[2].target == workspace_tmp / ".agents" / "skills" / "test-design"
-    assert plan[3].target == workspace_tmp / ".roo" / "commands" / "test-design.md"
+    assert plan[2].target == workspace_tmp / ".agents" / "skills" / "scenario-test-design"
+    assert plan[3].target == workspace_tmp / ".roo" / "commands" / "scenario-test-design.md"
 
 
 def test_install_copies_assets(workspace_tmp: Path) -> None:
-    workflow = get_workflow("test-design")
+    workflow = get_workflow("scenario-test-design")
     plan = build_install_plan(workflow, workspace_tmp, "roocode")
     plan = apply_default_actions(plan, CollisionAction.OVERWRITE)
 
@@ -44,8 +44,8 @@ def test_install_copies_assets(workspace_tmp: Path) -> None:
     assert len(result.copied) == 4
     assert (workspace_tmp / "AGENTS.md").is_file()
     assert (workspace_tmp / ".agents" / "shared" / "common_contract.md").is_file()
-    assert (workspace_tmp / ".agents" / "skills" / "test-design" / "SKILL.md").is_file()
-    assert (workspace_tmp / ".roo" / "commands" / "test-design.md").is_file()
+    assert (workspace_tmp / ".agents" / "skills" / "scenario-test-design" / "SKILL.md").is_file()
+    assert (workspace_tmp / ".roo" / "commands" / "scenario-test-design.md").is_file()
 
 
 def test_next_available_agents_path(workspace_tmp: Path) -> None:

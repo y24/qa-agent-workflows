@@ -61,7 +61,7 @@ def install(
     if result.skipped:
         console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
     if selected_workflow_id == "all":
-        console.print("RooCodeで `/test-design docsフォルダの資料を参照してテスト設計を開始して` のように指示してください。")
+        console.print("RooCodeで `/scenario-test-design <入力資料>` など、導入したworkflowのslash commandを実行してください。")
     else:
         console.print(selected_workflows[0].post_install_message)
 

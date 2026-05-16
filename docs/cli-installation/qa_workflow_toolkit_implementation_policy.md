@@ -21,7 +21,7 @@ qatool install
 - `.agents/skills/<workflow>/`
 - `.roo/commands/<workflow>.md`
 
-導入後、利用者はRooCode上で `/test-design` などの slash command を実行し、各QAワークフローを開始する。
+導入後、利用者はRooCode上で `/scenario-test-design` などの slash command を実行し、各QAワークフローを開始する。
 
 ---
 
@@ -44,7 +44,7 @@ CLIの責務は以下に限定する。
 
 ### 2.2 ワークフロー固有知識をCLIに埋め込まない
 
-CLI本体に `test-design` や `risk-based-test-design` などの個別ワークフロー前提の分岐を書かない。
+CLI本体に `scenario-test-design` や `risk-based-test-design` などの個別ワークフロー前提の分岐を書かない。
 
 ワークフローの情報は `workflow.json` に定義し、CLIはそれを読み込んで動作する。
 
@@ -91,7 +91,7 @@ target-project/
 │  │  ├─ output_location_policy.md
 │  │  └─ terminology.md
 │  └─ skills/
-│     └─ test-design/
+│     └─ scenario-test-design/
 │        ├─ SKILL.md
 │        ├─ rules.md
 │        ├─ orchestrator.md
@@ -100,7 +100,7 @@ target-project/
 │        └─ references/
 └─ .roo/
    └─ commands/
-      └─ test-design.md
+      └─ scenario-test-design.md
 ```
 
 複数ワークフローを導入した場合は、`.agents/skills/` と `.roo/commands/` に対象ワークフロー分のファイルを追加する。
@@ -109,14 +109,12 @@ target-project/
 .agents/
 ├─ shared/
 └─ skills/
-   ├─ test-design/
    ├─ scenario-test-design/
    ├─ risk-based-test-design/
    └─ defect-analysis/
 
 .roo/
 └─ commands/
-   ├─ test-design.md
    ├─ scenario-test-design.md
    ├─ risk-based-test-design.md
    └─ defect-analysis.md
@@ -155,20 +153,10 @@ qa-workflow-toolkit/
 │        │  ├─ output_location_policy.md
 │        │  └─ terminology.md
 │        ├─ workflows/
-│        │  ├─ test-design/
-│        │  │  ├─ workflow.json
-│        │  │  └─ skill/
-│        │  │     ├─ SKILL.md
-│        │  │     ├─ rules.md
-│        │  │     ├─ orchestrator.md
-│        │  │     ├─ steps/
-│        │  │     ├─ templates/
-│        │  │     └─ references/
 │        │  ├─ scenario-test-design/
 │        │  └─ risk-based-test-design/
 │        └─ commands/
 │           └─ roocode/
-│              ├─ test-design.md
 │              ├─ scenario-test-design.md
 │              └─ risk-based-test-design.md
 └─ tests/
@@ -377,12 +365,12 @@ qatool list --installed
 
 ```json
 {
-  "id": "test-design",
-  "display_name": "テスト設計",
-  "description": "入力資料からテスト観点とテストケースを段階的に設計するQAワークフロー",
+  "id": "scenario-test-design",
+  "display_name": "シナリオテスト設計",
+  "description": "要件、業務フロー、画面仕様、ドメインルールからシナリオテストを設計する",
   "version": "0.1.0",
-  "skill_name": "test-design",
-  "command_name": "test-design",
+  "skill_name": "scenario-test-design",
+  "command_name": "scenario-test-design",
   "supported_agents": ["roocode"],
   "default_agent": "roocode",
   "install": {
@@ -392,15 +380,15 @@ qatool list --installed
       "target": ".agents/shared"
     },
     "skill": {
-      "source": "workflows/test-design/skill",
-      "target": ".agents/skills/test-design"
+      "source": "workflows/scenario-test-design/skill",
+      "target": ".agents/skills/scenario-test-design"
     },
     "command": {
-      "source": "commands/roocode/test-design.md",
-      "target": ".roo/commands/test-design.md"
+      "source": "commands/roocode/scenario-test-design.md",
+      "target": ".roo/commands/scenario-test-design.md"
     }
   },
-  "post_install_message": "RooCodeで `/test-design docsフォルダの資料を参照してテスト設計を開始して` のように指示してください。"
+  "post_install_message": "RooCodeで `/scenario-test-design <入力資料>` のように指示してください。"
 }
 ```
 
@@ -545,7 +533,7 @@ Skip       既存のsharedを維持する
 
 ```md
 <!-- generated-by: qa-workflow-toolkit -->
-<!-- workflow-id: test-design -->
+<!-- workflow-id: scenario-test-design -->
 <!-- toolkit-version: 0.1.0 -->
 ```
 
@@ -566,7 +554,7 @@ Skip       既存のsharedを維持する
 `SKILL.md` から見た相対パスは以下になる。
 
 ```text
-.agents/skills/test-design/SKILL.md
+.agents/skills/scenario-test-design/SKILL.md
   → ../../shared/common_contract.md
 ```
 
@@ -601,7 +589,7 @@ Skip       既存のsharedを維持する
 
 RooCode用の slash command は `.roo/commands/<workflow>.md` に配置する。
 
-例: `.roo/commands/test-design.md`
+例: `.roo/commands/scenario-test-design.md`
 
 ```md
 ---
@@ -609,9 +597,9 @@ description: テスト設計ワークフローを開始する
 argument-hint: <入力資料フォルダまたは対象ドキュメント>
 ---
 
-# Test Design Workflow
+# Scenario Test Design Workflow
 
-Use the `test-design` skill.
+Use the `scenario-test-design` skill.
 
 User request:
 {{arguments}}
@@ -665,7 +653,7 @@ slash command には、以下を書かない。
 
 ### 16.2 対象ワークフロー
 
-- `test-design` のみ
+- `scenario-test-design` のみ
 
 ただし、構造としては複数ワークフロー追加に耐えられるようにする。
 
@@ -682,8 +670,8 @@ qatool install
 ```text
 AGENTS.md
 .agents/shared/**
-.agents/skills/test-design/**
-.roo/commands/test-design.md
+.agents/skills/scenario-test-design/**
+.roo/commands/scenario-test-design.md
 ```
 
 ### 16.5 衝突処理
@@ -757,15 +745,15 @@ AGENTS.md
 - インストール実行
 - 結果表示
 
-### Step 7: test-designアセットを移植する
+### Step 7: scenario-test-designアセットを移植する
 
-既存のQAプロンプト・ワークフロー資産から、`test-design` をMVP対象として移植する。
+既存のQAプロンプト・ワークフロー資産から、`scenario-test-design` をMVP対象として移植する。
 
 移植先:
 
 ```text
-assets/workflows/test-design/skill/
-assets/commands/roocode/test-design.md
+assets/workflows/scenario-test-design/skill/
+assets/commands/roocode/scenario-test-design.md
 assets/shared/
 assets/agents/roocode/AGENTS.md
 ```
@@ -791,15 +779,15 @@ assets/agents/roocode/AGENTS.md
 - 一時ディレクトリにファイルをコピーできる
 - `AGENTS.md` 既存時に別名作成できる
 - `.agents/shared/` が正しい場所に作成される
-- `.agents/skills/test-design/SKILL.md` が作成される
-- `.roo/commands/test-design.md` が作成される
+- `.agents/skills/scenario-test-design/SKILL.md` が作成される
+- `.roo/commands/scenario-test-design.md` が作成される
 
 ### Step 9: RooCode上で手動確認する
 
 確認内容:
 
-- `/test-design` がRooCodeで認識される
-- slash commandから `test-design` skill を使う流れになる
+- `/scenario-test-design` がRooCodeで認識される
+- slash commandから `scenario-test-design` skill を使う流れになる
 - skillが `.agents/shared/` の共通方針を参照できる
 - ユーザー承認なしに次ステップへ進まない
 - 出力先ルールに従って成果物を保存しようとする
@@ -825,7 +813,7 @@ assets/agents/roocode/AGENTS.md
 
 - `qatool`
 - `qatool list`
-- `qatool install --workflow test-design --agent roocode --yes` のような非対話実行
+- `qatool install --workflow scenario-test-design --agent roocode --yes` のような非対話実行
 
 MVPでは対話UIの完全自動テストは無理に行わず、内部ロジックを単体テストし、CLIは最小限の起動確認に留める。
 
@@ -939,15 +927,15 @@ MVPは、以下を満たした時点で完了とする。
 
 1. `pip install -e .` で `qatool` コマンドが使える
 2. `qatool` でロゴ、バージョン、使い方が表示される
-3. `qatool list` で `test-design` が表示される
-4. `qatool install` で対話的に `test-design` を選択できる
+3. `qatool list` で `scenario-test-design` が表示される
+4. `qatool install` で対話的に `scenario-test-design` を選択できる
 5. `AGENTS.md` が配置される
 6. `.agents/shared/` が配置される
-7. `.agents/skills/test-design/` が配置される
-8. `.roo/commands/test-design.md` が配置される
+7. `.agents/skills/scenario-test-design/` が配置される
+8. `.roo/commands/scenario-test-design.md` が配置される
 9. 既存 `AGENTS.md` に対して上書き・別名作成・スキップを選べる
-10. RooCode上で `/test-design` が利用できる
-11. `/test-design docsフォルダの資料を参照してテスト設計を開始して` のような指示で、test-design skillのワークフローを開始できる
+10. RooCode上で `/scenario-test-design` が利用できる
+11. `/scenario-test-design docsフォルダの資料を参照してシナリオテストを設計して` のような指示で、scenario-test-design skillのワークフローを開始できる
 
 ---
 
@@ -969,4 +957,3 @@ AGENTS.md
 RooCodeのslash commandは `.roo/commands/<workflow>.md` に置き、skillを呼び出す薄い入口として扱う。
 
 この構成により、既存のQAワークフロー資産を活かしつつ、将来的なワークフロー追加や他エージェント対応にも拡張しやすいCLIツールにできる。
-

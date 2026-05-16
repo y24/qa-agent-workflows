@@ -8,9 +8,9 @@ def test_list_outputs_workflows_without_table() -> None:
 
     assert result.exit_code == 0
     assert "Available workflows" in result.output
-    assert "test-design - テスト設計" in result.output
-    assert "入力資料から適切なQA workflowを選び" in result.output
-    assert "段階的にテスト設計を開始する総合入口" in result.output
+    assert "test-design - テスト設計" not in result.output
+    assert "scenario-test-design - シナリオテスト設計" in result.output
+    assert "要件、業務フロー、画面仕様、ドメインルールからシナリオテストを設計する" in result.output
     assert "Agents:" not in result.output
     assert "┏" not in result.output
     assert "┃" not in result.output
