@@ -5,7 +5,7 @@ from typing import Optional
 
 import typer
 
-from .console import console, print_header, print_plan, print_usage, print_workflow_table
+from .console import console, print_header, print_plan, print_usage, print_workflow_list
 from .installer import apply_default_actions, build_install_plan, install_from_plan
 from .models import CollisionAction, InstallPlanItem
 from .registry import get_workflow, load_workflows
@@ -23,7 +23,7 @@ def callback(ctx: typer.Context) -> None:
 def list_workflows() -> None:
     """Show available workflows."""
     print_header()
-    print_workflow_table(load_workflows())
+    print_workflow_list(load_workflows())
 
 
 @app.command()

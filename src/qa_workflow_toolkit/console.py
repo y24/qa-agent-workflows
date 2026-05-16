@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from rich.console import Console
+from rich.markup import escape
 from rich.table import Table
 
 from . import __version__
@@ -25,20 +26,12 @@ def print_usage() -> None:
     console.print("  qatool install --workflow all --agent roocode --yes")
 
 
-def print_workflow_table(workflows: list[WorkflowManifest]) -> None:
-    table = Table(title="Available workflows")
-    table.add_column("ID", style="cyan")
-    table.add_column("Name")
-    table.add_column("Description")
-    table.add_column("Agents")
+def print_workflow_list(workflows: list[WorkflowManifest]) -> None:
+    console.print("[bold]Available workflows[/bold]")
     for workflow in workflows:
-        table.add_row(
-            workflow.id,
-            workflow.display_name,
-            workflow.description,
-            ", ".join(workflow.supported_agents),
-        )
-    console.print(table)
+        console.print()
+        console.print(f"[bold cyan]{escape(workflow.id)}[/bold cyan] - {escape(workflow.display_name)}")
+        console.print(f"  {escape(workflow.description)}")
 
 
 def print_plan(plan: list[InstallPlanItem]) -> None:
