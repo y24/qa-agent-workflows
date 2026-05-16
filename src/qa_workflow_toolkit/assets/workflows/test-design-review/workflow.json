@@ -13,5 +13,5 @@
     "skill": {"source": "workflows/test-design-review/skill", "target": ".agents/skills/test-design-review"},
     "command": {"source": "commands/roocode/test-design-review.md", "target": ".roo/commands/test-design-review.md"}
   },
-  "post_install_message": "RooCodeで `/test-design-review <レビュー対象>` のように指示してください。"
+  "post_install_message": "\nusage:\n/test-design-review <レビュー対象>"
 }

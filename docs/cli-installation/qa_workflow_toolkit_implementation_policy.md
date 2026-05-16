@@ -388,7 +388,7 @@ qatool list --installed
       "target": ".roo/commands/scenario-test-design.md"
     }
   },
-  "post_install_message": "RooCodeで `/scenario-test-design <入力資料>` のように指示してください。"
+  "post_install_message": "\nusage:\n/scenario-test-design <入力資料>"
 }
 ```
 

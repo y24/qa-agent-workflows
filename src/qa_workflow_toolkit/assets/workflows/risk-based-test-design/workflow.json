@@ -13,5 +13,5 @@
     "skill": {"source": "workflows/risk-based-test-design/skill", "target": ".agents/skills/risk-based-test-design"},
     "command": {"source": "commands/roocode/risk-based-test-design.md", "target": ".roo/commands/risk-based-test-design.md"}
   },
-  "post_install_message": "RooCodeで `/risk-based-test-design <入力資料>` のように指示してください。"
+  "post_install_message": "\nusage:\n/risk-based-test-design <入力資料>"
 }
