@@ -66,8 +66,8 @@ def test_no_args_opens_interactive_menu_and_can_show_help(monkeypatch: pytest.Mo
     assert prompts == ["Select command"]
     assert choice_titles == [
         [
-            "workflow - QA workflow assets のインストール、更新、削除、一覧表示",
-            "wiki - LLM wiki assets の初期化",
+            "workflow - QA workflow skills のインストール、更新、削除",
+            "wiki - LLM wiki の構築",
             "help - 利用できるコマンドと実行例を表示",
         ]
     ]
@@ -109,9 +109,9 @@ def test_interactive_workflow_list_shows_operation_menu(monkeypatch: pytest.Monk
     assert result.exit_code == 0
     assert prompts == ["Select command", "Select workflow operation"]
     assert choice_titles[1] == [
-        "install - QA workflow assets を対象プロジェクトへ配置",
-        "update - インストール済みの workflow assets を最新版で更新",
-        "uninstall - インストール済みの workflow assets を削除",
+        "install - QA workflow skills をカレントディレクトリへ配置",
+        "update - インストール済みの workflow skills を最新版に更新",
+        "uninstall - インストール済みの workflow skills を削除",
         "list - 利用可能な workflow 一覧を表示",
         "help - workflow コマンドのヘルプを表示",
     ]

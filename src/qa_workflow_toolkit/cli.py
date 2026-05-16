@@ -317,8 +317,8 @@ def _interactive_menu() -> None:
     selected_command = questionary.select(
         "Select command",
         choices=[
-            questionary.Choice("workflow - QA workflow assets のインストール、更新、削除、一覧表示", value="workflow"),
-            questionary.Choice("wiki - LLM wiki assets の初期化", value="wiki"),
+            questionary.Choice("workflow - QA workflow skills のインストール、更新、削除", value="workflow"),
+            questionary.Choice("wiki - LLM wiki の構築", value="wiki"),
             questionary.Choice("help - 利用できるコマンドと実行例を表示", value="help"),
         ],
     ).ask()
@@ -338,9 +338,9 @@ def _interactive_workflow_menu(questionary) -> None:
     selected_operation = questionary.select(
         "Select workflow operation",
         choices=[
-            questionary.Choice("install - QA workflow assets を対象プロジェクトへ配置", value="install"),
-            questionary.Choice("update - インストール済みの workflow assets を最新版で更新", value="update"),
-            questionary.Choice("uninstall - インストール済みの workflow assets を削除", value="uninstall"),
+            questionary.Choice("install - QA workflow skills をカレントディレクトリへ配置", value="install"),
+            questionary.Choice("update - インストール済みの workflow skills を最新版に更新", value="update"),
+            questionary.Choice("uninstall - インストール済みの workflow skills を削除", value="uninstall"),
             questionary.Choice("list - 利用可能な workflow 一覧を表示", value="list"),
             questionary.Choice("help - workflow コマンドのヘルプを表示", value="help"),
         ],
