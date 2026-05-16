@@ -1,0 +1,17 @@
+{
+  "id": "scenario-test-design",
+  "display_name": "シナリオテスト設計",
+  "description": "要件、業務フロー、画面仕様、ドメインルールからシナリオテストを設計する",
+  "version": "0.1.0",
+  "skill_name": "scenario-test-design",
+  "command_name": "scenario-test-design",
+  "supported_agents": ["roocode"],
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/scenario-test-design/skill", "target": ".agents/skills/scenario-test-design"},
+    "command": {"source": "commands/roocode/scenario-test-design.md", "target": ".roo/commands/scenario-test-design.md"}
+  },
+  "post_install_message": "RooCodeで `/scenario-test-design <入力資料>` のように指示してください。"
+}

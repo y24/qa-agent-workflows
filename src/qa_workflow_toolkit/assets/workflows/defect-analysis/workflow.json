@@ -1,0 +1,17 @@
+{
+  "id": "defect-analysis",
+  "display_name": "不具合分析",
+  "description": "不具合チケットから事実抽出、分類・傾向分析、品質リスク化、後続テスト設計向け示唆を作る",
+  "version": "0.1.0",
+  "skill_name": "defect-analysis",
+  "command_name": "defect-analysis",
+  "supported_agents": ["roocode"],
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/defect-analysis/skill", "target": ".agents/skills/defect-analysis"},
+    "command": {"source": "commands/roocode/defect-analysis.md", "target": ".roo/commands/defect-analysis.md"}
+  },
+  "post_install_message": "RooCodeで `/defect-analysis <不具合チケット>` のように指示してください。"
+}

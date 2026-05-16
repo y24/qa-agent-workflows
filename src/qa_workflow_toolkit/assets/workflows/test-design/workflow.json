@@ -1,0 +1,17 @@
+{
+  "id": "test-design",
+  "display_name": "テスト設計",
+  "description": "入力資料から適切なQA workflowを選び、段階的にテスト設計を開始する総合入口",
+  "version": "0.1.0",
+  "skill_name": "test-design",
+  "command_name": "test-design",
+  "supported_agents": ["roocode"],
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/test-design/skill", "target": ".agents/skills/test-design"},
+    "command": {"source": "commands/roocode/test-design.md", "target": ".roo/commands/test-design.md"}
+  },
+  "post_install_message": "RooCodeで `/test-design docsフォルダの資料を参照してテスト設計を開始して` のように指示してください。"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "nonfunctional-quality-criteria-planning",
+  "display_name": "非機能品質クライテリア計画",
+  "description": "非機能品質の懸念抽出、品質クライテリア策定、確認方針・テスト計画組み込み案を作る",
+  "version": "0.1.0",
+  "skill_name": "nonfunctional-quality-criteria-planning",
+  "command_name": "nonfunctional-quality-criteria-planning",
+  "supported_agents": ["roocode"],
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/nonfunctional-quality-criteria-planning/skill", "target": ".agents/skills/nonfunctional-quality-criteria-planning"},
+    "command": {"source": "commands/roocode/nonfunctional-quality-criteria-planning.md", "target": ".roo/commands/nonfunctional-quality-criteria-planning.md"}
+  },
+  "post_install_message": "RooCodeで `/nonfunctional-quality-criteria-planning <入力資料>` のように指示してください。"
+}

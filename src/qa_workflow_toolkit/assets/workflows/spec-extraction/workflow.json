@@ -1,0 +1,17 @@
+{
+  "id": "spec-extraction",
+  "display_name": "仕様抽出",
+  "description": "開発文書からテスト設計に必要な仕様情報を抽出、正規化、棚卸しする",
+  "version": "0.1.0",
+  "skill_name": "spec-extraction",
+  "command_name": "spec-extraction",
+  "supported_agents": ["roocode"],
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/spec-extraction/skill", "target": ".agents/skills/spec-extraction"},
+    "command": {"source": "commands/roocode/spec-extraction.md", "target": ".roo/commands/spec-extraction.md"}
+  },
+  "post_install_message": "RooCodeで `/spec-extraction <入力資料>` のように指示してください。"
+}

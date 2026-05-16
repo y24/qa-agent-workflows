@@ -1,6 +1,8 @@
 # qa-agent-workflows
 
-このリポジトリは、QA業務向けの再利用可能な AI agent workflow skills をまとめたプロジェクトです。
+このリポジトリは、QA業務向けの再利用可能な AI agent workflow assets を対象プロジェクトへ配置する `qa-workflow-toolkit` CLI のプロジェクトです。
+
+`qatool` はワークフローを直接実行しません。RooCodeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/<workflow>/`、`.roo/commands/<workflow>.md` をインストールすることに責務を限定します。
 
 ## Common Working Rules
 
@@ -26,8 +28,25 @@
 ```text
 qa-agent-workflows/
   AGENTS.md
+  pyproject.toml
+  README.md
+  src/
+    qa_workflow_toolkit/
+      cli.py
+      installer.py
+      registry.py
+      models.py
+      assets/
+        agents/roocode/AGENTS.md
+        shared/
+        workflows/<workflow>/
+          workflow.json
+          skill/
+        commands/roocode/<workflow>.md
+  tests/
   docs/
     skill-authoring/
+    cli-installation/
   shared/
     common_contract.md
     evidence_and_confidence_policy.md
@@ -40,18 +59,11 @@ qa-agent-workflows/
     terminology.md
     review_gate_policy.md
     templates/
-  .agents/
-    skills/
-      spec-extraction/
-      scenario-test-design/
-      testcase-viewpoint-extraction/
-      risk-based-test-design/
-      nonfunctional-quality-criteria-planning/
-      test-design-review/
-      defect-analysis/
 ```
 
-各 skill は `SKILL.md` を入口とし、詳細な実行手順は `steps/`、判断基準や定義は `references/`、出力形式は `templates/` に置く。
+配布対象の正は `src/qa_workflow_toolkit/assets/` 配下です。インストーラがコピーする実体は package assets 側に置きます。
+
+各 workflow は `workflow.json` をmanifestとし、skill本体は `skill/SKILL.md` を入口にする。詳細な実行手順は `steps/`、判断基準や定義は `references/`、出力形式は `templates/` に置く。
 
 ## Output Location
 
@@ -60,7 +72,7 @@ qa-agent-workflows/
 - `run_id` は `YYYYMMDD-HHMMSS_<topic_slug>` 形式を基本とする。
 - 複数 skill をまたぐ作業では、同一 run ディレクトリ配下に skill 名ごとのサブディレクトリを作成する。
 - 最終成果物は `final/`、CSVやJSONなどの機械処理向け成果物は `exports/` に置く。
-- `.agents/skills/`、`shared/`、`docs/` に業務成果物を混在させない。
+- `src/qa_workflow_toolkit/assets/`、`shared/`、`docs/` に業務成果物を混在させない。
 - 詳細は `shared/output_location_policy.md` に従う。
 
 ## Output Conventions
@@ -73,8 +85,10 @@ qa-agent-workflows/
 ## Change Policy
 
 - 既存のステップID、成果物ID、参照IDは可能な限り維持する。
-- 共通ルールは `shared/`、skill固有ルールは該当 skill の `references/` に置き、責務の重複を増やさない。
+- 共通ルールは package assets の `assets/shared/`、skill固有ルールは該当 workflow の `skill/references/` に置き、責務の重複を増やさない。
 - skill の追加・再構成時の詳細方針は `docs/skill-authoring/` に置く。
+- CLI本体にworkflow固有の手順や判断基準を埋め込まない。workflow固有情報は `workflow.json` と asset markdown に閉じ込める。
+- 既存ファイルを無確認で上書きする挙動を追加しない。`--yes` は明示指定時のみ上書きに使う。
 
 ## Skill Maintenance
 

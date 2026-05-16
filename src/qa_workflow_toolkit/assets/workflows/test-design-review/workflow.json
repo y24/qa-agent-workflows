@@ -1,0 +1,17 @@
+{
+  "id": "test-design-review",
+  "display_name": "テスト設計レビュー",
+  "description": "既存のテスト設計書、観点表、テストケース一覧を根拠付きでレビューする",
+  "version": "0.1.0",
+  "skill_name": "test-design-review",
+  "command_name": "test-design-review",
+  "supported_agents": ["roocode"],
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/test-design-review/skill", "target": ".agents/skills/test-design-review"},
+    "command": {"source": "commands/roocode/test-design-review.md", "target": ".roo/commands/test-design-review.md"}
+  },
+  "post_install_message": "RooCodeで `/test-design-review <レビュー対象>` のように指示してください。"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "risk-based-test-design",
+  "display_name": "リスクベーステスト設計",
+  "description": "リスク候補の抽出、評価、優先度付け、リスクベースのテスト方針とテストケース骨子を作る",
+  "version": "0.1.0",
+  "skill_name": "risk-based-test-design",
+  "command_name": "risk-based-test-design",
+  "supported_agents": ["roocode"],
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/risk-based-test-design/skill", "target": ".agents/skills/risk-based-test-design"},
+    "command": {"source": "commands/roocode/risk-based-test-design.md", "target": ".roo/commands/risk-based-test-design.md"}
+  },
+  "post_install_message": "RooCodeで `/risk-based-test-design <入力資料>` のように指示してください。"
+}
