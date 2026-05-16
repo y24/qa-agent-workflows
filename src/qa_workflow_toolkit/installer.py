@@ -99,7 +99,10 @@ def uninstall_from_plan(plan: list[UninstallPlanItem]) -> UninstallResult:
     skipped: list[Path] = []
 
     for item in plan:
-        if not item.exists or not item.safe_to_remove:
+        if not item.exists:
+            continue
+
+        if not item.safe_to_remove:
             skipped.append(item.target)
             continue
 

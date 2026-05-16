@@ -50,6 +50,10 @@ def load_installed_workflows(target: Path) -> dict[str, InstalledWorkflow]:
 
 def save_installed_workflows(target: Path, workflows: dict[str, InstalledWorkflow]) -> None:
     path = state_file_path(target)
+    if not workflows:
+        path.unlink(missing_ok=True)
+        return
+
     path.parent.mkdir(parents=True, exist_ok=True)
     data: dict[str, Any] = {
         "schema_version": STATE_SCHEMA_VERSION,

@@ -110,6 +110,21 @@ def test_uninstall_skips_modified_assets(workspace_tmp: Path) -> None:
     assert command_path.is_file()
 
 
+def test_uninstall_does_not_count_missing_assets_as_skipped(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    initial_plan = apply_default_actions(
+        build_install_plan(workflow, workspace_tmp, "roocode", include_agents_md=False),
+        CollisionAction.OVERWRITE,
+    )
+    install_from_plan(initial_plan)
+    plan = build_uninstall_plan(workflow, workspace_tmp, "roocode", include_agents_md=True)
+
+    result = uninstall_from_plan(plan)
+
+    assert workspace_tmp / "AGENTS.md" not in result.skipped
+    assert result.skipped == ()
+
+
 def test_asset_exactly_matches_path_rejects_extra_directory_files(workspace_tmp: Path) -> None:
     workflow = get_workflow("scenario-test-design")
     initial_plan = apply_default_actions(build_install_plan(workflow, workspace_tmp, "roocode"), CollisionAction.OVERWRITE)

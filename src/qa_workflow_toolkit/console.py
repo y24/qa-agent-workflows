@@ -81,6 +81,8 @@ def print_uninstall_plan(plan: list[UninstallPlanItem]) -> None:
     table.add_column("Exists")
     table.add_column("Action")
     for item in plan:
+        if not item.exists:
+            continue
         table.add_row(
             item.kind,
             str(item.target),

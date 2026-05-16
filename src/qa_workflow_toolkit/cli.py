@@ -55,9 +55,10 @@ def install(
     selected_workflows = workflows if selected_workflow_id == "all" else [get_workflow(selected_workflow_id)]
     default_agent = selected_workflows[0].default_agent
     supported_agents = tuple(sorted(set.intersection(*(set(item.supported_agents) for item in selected_workflows))))
-    selected_agent = agent or _select_agent(supported_agents, default_agent)
     resolved_target = target.resolve()
-    include_agents_md = _resolve_agents_md_choice(agents_md, yes, resolved_target, selected_agent)
+    installed_metadata = load_installed_workflows(resolved_target)
+    selected_agent = agent or _resolve_agent_choice(installed_metadata, selected_workflows, supported_agents, default_agent)
+    include_agents_md = _resolve_agents_md_choice(agents_md, yes, resolved_target, selected_agent, installed_metadata, selected_workflows)
 
     plan = _dedupe_plan(
         item
@@ -163,33 +164,33 @@ def uninstall(
     print_header()
     workflows = load_workflows()
     resolved_target = target.resolve()
-    selected_workflow_id = workflow or "all"
     installed_workflows = _installed_workflows(workflows, resolved_target)
-    selected_workflows = (
-        installed_workflows if selected_workflow_id == "all" else [_require_installed(get_workflow(selected_workflow_id), resolved_target)]
-    )
-    if not selected_workflows:
+    if not installed_workflows:
         console.print("[yellow]No installed workflow assets were found.[/yellow]")
         raise typer.Exit(1)
 
-    default_agent = selected_workflows[0].default_agent
-    supported_agents = tuple(sorted(set.intersection(*(set(item.supported_agents) for item in selected_workflows))))
-    selected_agent = agent or _select_agent(supported_agents, default_agent)
-    include_shared = selected_workflow_id == "all"
+    selected_workflow_id = workflow or _select_installed_workflow(installed_workflows)
+    installed_metadata = _installed_workflow_metadata(workflows, resolved_target)
+    selected_workflows = (
+        installed_workflows if selected_workflow_id == "all" else [_require_installed(get_workflow(selected_workflow_id), resolved_target)]
+    )
+    selected_metadata = [_require_installed_metadata(selected_workflow, installed_metadata) for selected_workflow in selected_workflows]
+    include_common_assets = {workflow.id for workflow in selected_workflows} == {workflow.id for workflow in installed_workflows}
 
     plan = _dedupe_uninstall_plan(
         item
-        for index, selected_workflow in enumerate(selected_workflows)
+        for index, metadata in enumerate(selected_metadata)
+        for selected_workflow in [get_workflow(metadata.workflow_id)]
         for item in build_uninstall_plan(
             selected_workflow,
             resolved_target,
-            selected_agent,
-            include_shared=include_shared and index == 0,
-            include_agents_md=include_shared and index == 0,
+            agent or metadata.agent,
+            include_shared=include_common_assets and index == 0,
+            include_agents_md=include_common_assets and index == 0,
         )
     )
     print_uninstall_plan(plan)
-    if not yes and not _questionary().confirm("Remove these files? Modified files are skipped.", default=False).ask():
+    if not yes and not _questionary().confirm("Remove these files? Modified files are skipped.", default=True).ask():
         raise typer.Exit(1)
 
     result = uninstall_from_plan(plan)
@@ -212,6 +213,16 @@ def _select_workflow(workflows: list) -> str:
     return str(selected)
 
 
+def _select_installed_workflow(workflows: list[WorkflowManifest]) -> str:
+    questionary = _questionary()
+    choices = [questionary.Choice("all - インストール済みのすべてのworkflow", value="all")]
+    choices.extend(questionary.Choice(f"{workflow.id} - {workflow.display_name}", value=workflow.id) for workflow in workflows)
+    selected = questionary.select("Select workflow to uninstall", choices=choices).ask()
+    if not selected:
+        raise typer.Exit(1)
+    return str(selected)
+
+
 def _select_agent(supported_agents: tuple[str, ...], default_agent: str) -> str:
     questionary = _questionary()
     selected = questionary.select("Select target agent", choices=list(supported_agents), default=default_agent).ask()
@@ -220,9 +231,32 @@ def _select_agent(supported_agents: tuple[str, ...], default_agent: str) -> str:
     return str(selected)
 
 
-def _resolve_agents_md_choice(agents_md: Optional[bool], yes: bool, target: Path, agent: str) -> bool:
+def _resolve_agent_choice(
+    installed_metadata: dict[str, InstalledWorkflow],
+    selected_workflows: list[WorkflowManifest],
+    supported_agents: tuple[str, ...],
+    default_agent: str,
+) -> str:
+    saved_agent = _saved_metadata_value(installed_metadata, selected_workflows, "agent")
+    if isinstance(saved_agent, str) and saved_agent in supported_agents:
+        return saved_agent
+    return _select_agent(supported_agents, default_agent)
+
+
+def _resolve_agents_md_choice(
+    agents_md: Optional[bool],
+    yes: bool,
+    target: Path,
+    agent: str,
+    installed_metadata: dict[str, InstalledWorkflow] | None = None,
+    selected_workflows: list[WorkflowManifest] | None = None,
+) -> bool:
     if agents_md is not None:
         return agents_md
+    if installed_metadata is not None and selected_workflows is not None:
+        saved_include_agents_md = _saved_metadata_value(installed_metadata, selected_workflows, "include_agents_md")
+        if isinstance(saved_include_agents_md, bool):
+            return saved_include_agents_md
     if yes:
         return True
     if asset_matches_path(f"agents/{agent}/AGENTS.md", target / "AGENTS.md"):
@@ -235,6 +269,26 @@ def _resolve_agents_md_choice(agents_md: Optional[bool], yes: bool, target: Path
     if selected is None:
         raise typer.Exit(1)
     return bool(selected)
+
+
+def _saved_metadata_value(
+    installed_metadata: dict[str, InstalledWorkflow],
+    selected_workflows: list[WorkflowManifest],
+    field_name: str,
+) -> object | None:
+    selected_workflow_ids = {workflow.id for workflow in selected_workflows}
+    selected_values = {
+        getattr(metadata, field_name)
+        for workflow_id, metadata in installed_metadata.items()
+        if workflow_id in selected_workflow_ids
+    }
+    if len(selected_values) == 1:
+        return next(iter(selected_values))
+
+    repo_values = {getattr(metadata, field_name) for metadata in installed_metadata.values()}
+    if len(repo_values) == 1:
+        return next(iter(repo_values))
+    return None
 
 
 def _resolve_collision(item: InstallPlanItem) -> InstallPlanItem:
@@ -336,7 +390,7 @@ def _questionary():
     try:
         import questionary
     except ModuleNotFoundError as exc:
-        raise typer.BadParameter("questionary is required for interactive install. Run `pip install -e .`.") from exc
+        raise typer.BadParameter("questionary is required for interactive prompts. Run `pip install -e .`.") from exc
     return questionary
 
 
