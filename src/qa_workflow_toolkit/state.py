@@ -11,6 +11,7 @@ from .models import WorkflowManifest
 STATE_DIR_NAME = ".qa-toolkit"
 STATE_FILE_NAME = "workflows.json"
 STATE_SCHEMA_VERSION = 1
+DEFAULT_AGENT = "roocode"
 
 
 @dataclass(frozen=True)
@@ -34,13 +35,15 @@ def load_installed_workflows(target: Path) -> dict[str, InstalledWorkflow]:
 
     data = json.loads(path.read_text(encoding="utf-8"))
     workflows = data.get("workflows", [])
+    agent = str(data["agent"])
+    include_agents_md = bool(data["include_agents_md"])
     installed: dict[str, InstalledWorkflow] = {}
     for item in workflows:
         workflow_id = str(item["workflow_id"])
         installed[workflow_id] = InstalledWorkflow(
             workflow_id=workflow_id,
-            agent=str(item["agent"]),
-            include_agents_md=bool(item.get("include_agents_md", True)),
+            agent=agent,
+            include_agents_md=include_agents_md,
             manifest_version=str(item.get("manifest_version", "")),
             installed_at=str(item.get("installed_at", "")),
             updated_at=str(item.get("updated_at", "")),
@@ -55,13 +58,15 @@ def save_installed_workflows(target: Path, workflows: dict[str, InstalledWorkflo
         return
 
     path.parent.mkdir(parents=True, exist_ok=True)
+    agent = _single_workflow_value(workflows, "agent", DEFAULT_AGENT)
+    include_agents_md = _single_workflow_value(workflows, "include_agents_md", True)
     data: dict[str, Any] = {
         "schema_version": STATE_SCHEMA_VERSION,
+        "agent": agent,
+        "include_agents_md": include_agents_md,
         "workflows": [
             {
                 "workflow_id": workflow.workflow_id,
-                "agent": workflow.agent,
-                "include_agents_md": workflow.include_agents_md,
                 "manifest_version": workflow.manifest_version,
                 "installed_at": workflow.installed_at,
                 "updated_at": workflow.updated_at,
@@ -102,3 +107,10 @@ def remove_installed_workflows(target: Path, workflow_ids: list[str]) -> None:
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def _single_workflow_value(workflows: dict[str, InstalledWorkflow], field_name: str, default: Any) -> Any:
+    values = {getattr(workflow, field_name) for workflow in workflows.values()}
+    if len(values) == 1:
+        return next(iter(values))
+    return default

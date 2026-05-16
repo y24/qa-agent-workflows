@@ -115,9 +115,11 @@ def test_install_records_workflow_metadata() -> None:
 
         assert result.exit_code == 0
         assert metadata["schema_version"] == 1
+        assert metadata["agent"] == "roocode"
+        assert metadata["include_agents_md"] is False
         assert metadata["workflows"][0]["workflow_id"] == "risk-based-test-design"
-        assert metadata["workflows"][0]["agent"] == "roocode"
-        assert metadata["workflows"][0]["include_agents_md"] is False
+        assert "agent" not in metadata["workflows"][0]
+        assert "include_agents_md" not in metadata["workflows"][0]
     finally:
         shutil.rmtree(target, ignore_errors=True)
 
@@ -165,8 +167,10 @@ def test_install_reuses_recorded_agent_and_agents_md_choice(monkeypatch: pytest.
         assert first_result.exit_code == 0
         assert second_result.exit_code == 0
         assert not (target / "AGENTS.md").exists()
-        assert installed["scenario-test-design"]["agent"] == "roocode"
-        assert installed["scenario-test-design"]["include_agents_md"] is False
+        assert metadata["agent"] == "roocode"
+        assert metadata["include_agents_md"] is False
+        assert "agent" not in installed["scenario-test-design"]
+        assert "include_agents_md" not in installed["scenario-test-design"]
     finally:
         shutil.rmtree(target, ignore_errors=True)
 
@@ -597,6 +601,50 @@ def test_uninstall_plan_hides_missing_targets() -> None:
         assert "│ agents_md " not in uninstall_result.output
         assert "Removed 3 item(s)." in uninstall_result.output
         assert "Skipped" not in uninstall_result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_uninstall_plan_hides_agents_md_when_install_skipped_it() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        install_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--no-agents-md",
+                "--yes",
+            ],
+        )
+        (target / "AGENTS.md").write_text("project specific instructions", encoding="utf-8")
+        uninstall_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "uninstall",
+                "--workflow",
+                "all",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        assert install_result.exit_code == 0
+        assert uninstall_result.exit_code == 0
+        assert "AGENTS.md" not in uninstall_result.output
+        assert "│ agents_md " not in uninstall_result.output
+        assert "Removed 3 item(s)." in uninstall_result.output
+        assert "Skipped" not in uninstall_result.output
+        assert (target / "AGENTS.md").read_text(encoding="utf-8") == "project specific instructions"
     finally:
         shutil.rmtree(target, ignore_errors=True)
 

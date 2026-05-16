@@ -186,7 +186,7 @@ def uninstall(
             resolved_target,
             agent or metadata.agent,
             include_shared=include_common_assets and index == 0,
-            include_agents_md=include_common_assets and index == 0,
+            include_agents_md=metadata.include_agents_md and include_common_assets and index == 0,
         )
     )
     print_uninstall_plan(plan)

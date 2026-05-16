@@ -1,10 +1,11 @@
 from pathlib import Path
+import json
 import shutil
 import uuid
 
 import pytest
 
-from qa_workflow_toolkit.state import load_installed_workflows, remove_installed_workflows, save_installed_workflows
+from qa_workflow_toolkit.state import InstalledWorkflow, load_installed_workflows, remove_installed_workflows, save_installed_workflows
 
 
 @pytest.fixture()
@@ -37,11 +38,11 @@ def test_remove_installed_workflows_removes_empty_state_file(workspace_tmp) -> N
     (state_dir / "workflows.json").write_text(
         """{
   "schema_version": 1,
+  "agent": "roocode",
+  "include_agents_md": true,
   "workflows": [
     {
       "workflow_id": "scenario-test-design",
-      "agent": "roocode",
-      "include_agents_md": true,
       "manifest_version": "1.0.0",
       "installed_at": "2026-05-16T00:00:00+00:00",
       "updated_at": "2026-05-16T00:00:00+00:00"
@@ -56,3 +57,53 @@ def test_remove_installed_workflows_removes_empty_state_file(workspace_tmp) -> N
 
     assert state_dir.exists()
     assert not (state_dir / "workflows.json").exists()
+
+
+def test_save_installed_workflows_stores_agent_config_once(workspace_tmp) -> None:
+    save_installed_workflows(
+        workspace_tmp,
+        {
+            "scenario-test-design": InstalledWorkflow(
+                workflow_id="scenario-test-design",
+                agent="roocode",
+                include_agents_md=False,
+                manifest_version="1.0.0",
+                installed_at="2026-05-16T00:00:00+00:00",
+                updated_at="2026-05-16T00:00:00+00:00",
+            )
+        },
+    )
+
+    data = json.loads((workspace_tmp / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+
+    assert data["agent"] == "roocode"
+    assert data["include_agents_md"] is False
+    assert "agent" not in data["workflows"][0]
+    assert "include_agents_md" not in data["workflows"][0]
+
+
+def test_load_installed_workflows_reads_top_level_agent_config(workspace_tmp) -> None:
+    state_dir = workspace_tmp / ".qa-toolkit"
+    state_dir.mkdir()
+    (state_dir / "workflows.json").write_text(
+        """{
+  "schema_version": 1,
+  "agent": "roocode",
+  "include_agents_md": false,
+  "workflows": [
+    {
+      "workflow_id": "scenario-test-design",
+      "manifest_version": "1.0.0",
+      "installed_at": "2026-05-16T00:00:00+00:00",
+      "updated_at": "2026-05-16T00:00:00+00:00"
+    }
+  ]
+}
+""",
+        encoding="utf-8",
+    )
+
+    installed = load_installed_workflows(workspace_tmp)
+
+    assert installed["scenario-test-design"].agent == "roocode"
+    assert installed["scenario-test-design"].include_agents_md is False
