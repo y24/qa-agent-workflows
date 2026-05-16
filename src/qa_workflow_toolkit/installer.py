@@ -9,12 +9,17 @@ from .models import CollisionAction, InstallPlanItem, InstallResult, WorkflowMan
 from .paths import asset_path
 
 
-def build_install_plan(workflow: WorkflowManifest, target_dir: Path, agent: str) -> list[InstallPlanItem]:
+def build_install_plan(
+    workflow: WorkflowManifest,
+    target_dir: Path,
+    agent: str,
+    include_agents_md: bool = True,
+) -> list[InstallPlanItem]:
     if agent not in workflow.supported_agents:
         raise ValueError(f"{workflow.id} does not support agent: {agent}")
 
     items: list[InstallPlanItem] = []
-    if workflow.install.agents_md:
+    if include_agents_md and workflow.install.agents_md:
         items.append(_plan_item("agents_md", f"agents/{agent}/AGENTS.md", target_dir / "AGENTS.md"))
 
     items.append(_plan_item("shared", workflow.install.shared.source, target_dir / workflow.install.shared.target))

@@ -55,3 +55,33 @@ def test_install_outputs_example_prompt() -> None:
         assert "RooCodeで" not in result.output
     finally:
         shutil.rmtree(target, ignore_errors=True)
+
+
+def test_install_can_skip_agents_md() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "risk-based-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--no-agents-md",
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert "Installed 3 item(s)." in result.output
+        assert not (target / "AGENTS.md").exists()
+        assert (target / ".agents" / "shared" / "common_contract.md").is_file()
+        assert (target / ".agents" / "skills" / "risk-based-test-design" / "SKILL.md").is_file()
+        assert (target / ".roo" / "commands" / "risk-based-test-design.md").is_file()
+    finally:
+        shutil.rmtree(target, ignore_errors=True)

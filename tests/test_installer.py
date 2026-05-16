@@ -34,6 +34,14 @@ def test_build_install_plan_for_scenario_test_design(workspace_tmp: Path) -> Non
     assert plan[3].target == workspace_tmp / ".roo" / "commands" / "scenario-test-design.md"
 
 
+def test_build_install_plan_can_skip_agents_md(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    plan = build_install_plan(workflow, workspace_tmp, "roocode", include_agents_md=False)
+
+    assert [item.kind for item in plan] == ["shared", "skill", "command"]
+    assert all(item.target != workspace_tmp / "AGENTS.md" for item in plan)
+
+
 def test_install_copies_assets(workspace_tmp: Path) -> None:
     workflow = get_workflow("scenario-test-design")
     plan = build_install_plan(workflow, workspace_tmp, "roocode")

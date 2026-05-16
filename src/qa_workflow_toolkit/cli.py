@@ -34,6 +34,11 @@ def install(
     agent: Optional[str] = typer.Option(None, "--agent", "-a", help="Target agent."),
     target: Path = typer.Option(Path.cwd(), "--target", "-t", help="Target project directory."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Overwrite existing files without prompting."),
+    agents_md: Optional[bool] = typer.Option(
+        None,
+        "--agents-md/--no-agents-md",
+        help="Create AGENTS.md. If omitted in interactive mode, ask before installing.",
+    ),
 ) -> None:
     """Install QA workflow assets into a project."""
     print_header()
@@ -43,11 +48,17 @@ def install(
     default_agent = selected_workflows[0].default_agent
     supported_agents = tuple(sorted(set.intersection(*(set(item.supported_agents) for item in selected_workflows))))
     selected_agent = agent or _select_agent(supported_agents, default_agent)
+    include_agents_md = _resolve_agents_md_choice(agents_md, yes)
 
     plan = _dedupe_plan(
         item
         for selected_workflow in selected_workflows
-        for item in build_install_plan(selected_workflow, target.resolve(), selected_agent)
+        for item in build_install_plan(
+            selected_workflow,
+            target.resolve(),
+            selected_agent,
+            include_agents_md=include_agents_md,
+        )
     )
     if yes:
         plan = apply_default_actions(plan, CollisionAction.OVERWRITE)
@@ -87,6 +98,21 @@ def _select_agent(supported_agents: tuple[str, ...], default_agent: str) -> str:
     if not selected:
         raise typer.Exit(1)
     return str(selected)
+
+
+def _resolve_agents_md_choice(agents_md: Optional[bool], yes: bool) -> bool:
+    if agents_md is not None:
+        return agents_md
+    if yes:
+        return True
+
+    selected = _questionary().confirm(
+        "Create AGENTS.md? Choose No if you want to keep the target repository's existing agent instructions unchanged.",
+        default=True,
+    ).ask()
+    if selected is None:
+        raise typer.Exit(1)
+    return bool(selected)
 
 
 def _resolve_collision(item: InstallPlanItem) -> InstallPlanItem:
