@@ -47,8 +47,10 @@ def test_install_outputs_example_prompt() -> None:
         )
 
         assert result.exit_code == 0
+        assert "create" in result.output
+        assert "overwrite" not in result.output
         assert "Installed 4 item(s)." in result.output
-        assert "Example prompt:" in result.output
+        assert "Usage:" in result.output
         assert "/risk-based-test-design <入力資料>" in result.output
         assert "RooCodeで" not in result.output
     finally:

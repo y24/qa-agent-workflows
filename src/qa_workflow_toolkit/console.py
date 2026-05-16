@@ -66,5 +66,11 @@ def print_plan(plan: list[InstallPlanItem]) -> None:
     table.add_column("Exists")
     table.add_column("Action")
     for item in plan:
-        table.add_row(item.kind, str(item.target), "yes" if item.exists else "no", item.action.value if item.action else "")
+        table.add_row(item.kind, str(item.target), "yes" if item.exists else "no", _plan_action_label(item))
     console.print(table)
+
+
+def _plan_action_label(item: InstallPlanItem) -> str:
+    if not item.exists:
+        return "create"
+    return item.action.value if item.action else ""
