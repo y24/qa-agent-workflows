@@ -1,13 +1,14 @@
 # Naming Conventions
 
-この文書は、skill とその構成ファイルの命名規則を定義する。
+この文書は、workflow、skill、command とその構成ファイルの命名規則を定義する。
 名前は、通常実行時に必要なファイルをすばやく判断できることを優先する。
 
-## skill 名
+## workflow / skill / command 名
 
 - 小文字の kebab-case を使う。
 - 業務目的が分かる名前にする。
 - 技術的な実装方式ではなく、QA 業務上の用途を表す。
+- 原則として `workflow.json` の `id`、`skill_name`、`command_name`、ディレクトリ名、command ファイル名を揃える。
 
 例:
 
@@ -16,6 +17,13 @@ spec-extraction
 scenario-test-design
 testcase-viewpoint-extraction
 risk-based-test-design
+```
+
+対応する配置例:
+
+```text
+src/qa_workflow_toolkit/assets/workflow/workflows/risk-based-test-design/
+src/qa_workflow_toolkit/assets/workflow/commands/risk-based-test-design.md
 ```
 
 ## steps

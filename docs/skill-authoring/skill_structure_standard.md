@@ -1,7 +1,8 @@
 # Skill Structure Standard
 
-この文書は、`.agents/skills/<skill-name>/` 配下の標準構成を定義する。
-既存 skill の再構成でも、新規 skill の作成でも、この構成を基準にする。
+この文書は、`src/qa_workflow_toolkit/assets/workflow/workflows/<workflow>/skill/` 配下の標準構成を定義する。
+インストール後は対象リポジトリの `.agents/skills/<workflow>/` に配置される。
+既存 skill の再構成でも、新規 workflow の skill 作成でも、この構成を基準にする。
 
 ## 必須ファイル
 
@@ -39,7 +40,7 @@
 - どこでユーザー確認を待つか。
 - 入力不足、矛盾、対象外がある場合の分岐。
 - 最終成果物のまとめ方。
-- 実行成果物の出力先は `../../../shared/output_location_policy.md` に従うこと。
+- 実行成果物の出力先は、インストール後の `.agents/shared/output_location_policy.md` に従うこと。
 
 ## `rules.md` に置く内容
 
@@ -49,7 +50,7 @@
 - トレーサビリティの維持方法。
 - 粒度や優先度の判断方針。
 
-複数 skill で共通するルールは `shared/` に置き、`rules.md` では参照だけにする。
+複数 workflow で共通するルールは `src/qa_workflow_toolkit/assets/workflow/shared/` に置き、`rules.md` では参照だけにする。
 
 ## `steps/` に置く内容
 

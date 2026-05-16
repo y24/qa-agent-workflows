@@ -1,11 +1,13 @@
 # Migration Checklist
 
-既存プロンプト群や大型 `SKILL.md` を、標準的な skill 構成へ再編成する際に使う。
+既存プロンプト群や大型 `SKILL.md` を、現行 CLI が配布する標準的な workflow asset 構成へ再編成する際に使う。
 スクリプトで機械的に分割するのではなく、各ファイルの責務を確認して移す。
 
 ## 1. 対象確認
 
 - [ ] 対象 skill 名とディレクトリを確認した。
+- [ ] 対象 workflow の正が `src/qa_workflow_toolkit/assets/workflow/workflows/<workflow>/skill/` にあることを確認した。
+- [ ] `workflow.json` と command asset の有無を確認した。
 - [ ] 現在の `SKILL.md`、`steps/`、`references/`、`templates/`、`examples/` を棚卸しした。
 - [ ] 既存のステップ ID、成果物 ID、参照 ID を確認した。
 - [ ] 通常実行に必要な内容と、保守者向け説明を分けた。
@@ -20,7 +22,7 @@
 - [ ] 判断基準、分類、観点、用語を `references/` に分類した。
 - [ ] 成果物形式を `templates/` に分類した。
 - [ ] 具体例や完成例を `examples/` に分類した。
-- [ ] 複数 skill の共通ルールを `shared/` に分類した。
+- [ ] 複数 workflow の共通ルールを `src/qa_workflow_toolkit/assets/workflow/shared/` に分類した。
 
 ## 3. 分割と配置
 
@@ -36,6 +38,9 @@
 ## 4. 整合性確認
 
 - [ ] `SKILL.md` から参照するファイルが存在する。
+- [ ] `workflow.json` の `install.shared.source`、`install.skill.source`、`install.command.source` が実在する。
+- [ ] `workflow.json` の install target が `.agents/shared`、`.agents/skills/<workflow>`、`.roo/commands/<workflow>.md` の既存形式に揃っている。
+- [ ] command asset から対象 skill への誘導が成立している。
 - [ ] 移動前後で主要な業務内容が欠落していない。
 - [ ] 同じルールの重複記載が増えていない。
 - [ ] 前提、推測、未確認事項の扱いが維持されている。
@@ -55,5 +60,8 @@
 
 - [ ] `rg` などで古いファイル名への参照が残っていないことを確認した。
 - [ ] 追加・変更したファイルの差分を確認した。
+- [ ] `qatool workflow list` で対象 workflow が表示されることを確認した。
+- [ ] 一時ディレクトリへ roocode / claude の両方で install し、command 配置先を確認した。
+- [ ] `pytest` を実行し、registry / installer / CLI の期待値を確認した。
 - [ ] 影響範囲を説明できる状態にした。
 - [ ] 未解決の前提や確認事項を記録した。

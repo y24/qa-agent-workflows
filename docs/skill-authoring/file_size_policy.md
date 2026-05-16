@@ -36,7 +36,10 @@
 |---|---|
 | 常時適用する最小限のリポジトリルール | `AGENTS.md` |
 | skill 作成者向けの方針 | `docs/skill-authoring/` |
-| 複数 skill が実行時に使う共通ルール | `shared/` |
+| CLI が配布する workflow asset の正 | `src/qa_workflow_toolkit/assets/workflow/` |
+| 複数 workflow が実行時に使う共通ルール | `src/qa_workflow_toolkit/assets/workflow/shared/` |
+| command の入口 | `src/qa_workflow_toolkit/assets/workflow/commands/<workflow>.md` |
+| workflow manifest | `src/qa_workflow_toolkit/assets/workflow/workflows/<workflow>/workflow.json` |
 | skill の目的、起動条件、入出力 | `SKILL.md` |
 | workflow 全体の制御 | `orchestrator.md` |
 | skill 固有の品質基準や禁止事項 | `rules.md` |
@@ -58,5 +61,5 @@
 - 各 `steps/*.md` は、そのステップで必要な手順だけを含んでいるか。
 - 判断基準やカタログは `references/` に集約されているか。
 - テンプレートは `templates/` に分離され、列名や章立てが安定しているか。
-- 共通ルールが `shared/` に移され、重複が増えていないか。
+- 共通ルールが package asset 側の `assets/workflow/shared/` に移され、重複が増えていないか。
 - 既存の ID、参照、トレーサビリティが維持されているか。

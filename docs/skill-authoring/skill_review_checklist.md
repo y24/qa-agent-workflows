@@ -1,7 +1,15 @@
 # Skill Review Checklist
 
-新規 skill 追加後、または既存 skill の再構成後に使うレビュー観点。
+新規 workflow 追加後、または既存 skill の再構成後に使うレビュー観点。
 レビューでは、内容の網羅性だけでなく、通常実行時に読みやすい構成になっているかを確認する。
+
+## CLI Asset
+
+- [ ] 配布対象の正が `src/qa_workflow_toolkit/assets/workflow/` 配下にある。
+- [ ] `workflow.json` が必須項目を持ち、source / target が実在する asset と一致している。
+- [ ] `command_name` と `commands/<workflow>.md` が一致している。
+- [ ] `sort_order` が既存 workflow の表示順と矛盾していない。
+- [ ] `post_install_message` が最短の使用例になっている。
 
 ## 入口
 
@@ -16,7 +24,7 @@
 - [ ] ユーザー確認を待つ位置が明確になっている。
 - [ ] 入力不足、矛盾、対象外がある場合の扱いが明確になっている。
 - [ ] 各ステップの成果物が次ステップへ引き継がれる。
-- [ ] 実行成果物の出力先が `shared/output_location_policy.md` に従っている。
+- [ ] 実行成果物の出力先が `assets/workflow/shared/output_location_policy.md` に従っている。
 
 ## 手順
 
@@ -29,7 +37,7 @@
 
 - [ ] 判断基準、分類、カタログは `references/` に集約されている。
 - [ ] `references/*.md` が100行を超える場合は目次がある。
-- [ ] 共通ルールは `shared/` に置かれ、skill 固有ルールと混ざっていない。
+- [ ] 共通ルールは `assets/workflow/shared/` に置かれ、skill 固有ルールと混ざっていない。
 - [ ] 推測、前提、未確認事項、提案の扱いが明確である。
 
 ## テンプレート
@@ -50,7 +58,16 @@
 ## リンクと整合性
 
 - [ ] `SKILL.md`、`orchestrator.md`、`steps/` からの参照リンクが切れていない。
-- [ ] 実行時に参照する共通ポリシー一覧に `shared/output_location_policy.md` が含まれている。
+- [ ] 実行時に参照する共通ポリシー一覧に `output_location_policy.md` が含まれている。
 - [ ] 旧ファイル名への参照が残っていない。
 - [ ] 同じルールを複数ファイルに重複記載していない。
 - [ ] 削除・移動した内容の代替参照先が明確である。
+
+## CLI 確認
+
+- [ ] `qatool workflow list` で対象 workflow が表示される。
+- [ ] roocode install で `.roo/commands/<workflow>.md` に command が配置される。
+- [ ] claude install で `.claude/commands/<workflow>.md` に command が配置される。
+- [ ] 2回目の install で一致 asset が `no change` になる。
+- [ ] `update` と `uninstall` の挙動を説明できる。
+- [ ] `pytest` が通る。
