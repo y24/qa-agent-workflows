@@ -12,8 +12,7 @@
 - `wiki/`: LLMが作成・更新する知識ページ。
 - `index.md`: wiki全体の内容索引。ingestやqueryの前に最初に確認する。
 - `log.md`: ingest、query、lint、convertの時系列ログ。追記専用で扱う。
-- `.agents/skills/`: 操作用skill。
-- agent別commands: slash command。
+- agent別commands: wiki操作用のslash command。
 
 ## 基本方針
 

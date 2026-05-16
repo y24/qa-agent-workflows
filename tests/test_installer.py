@@ -52,6 +52,7 @@ def test_build_wiki_init_items_uses_agent_specific_command_target(workspace_tmp:
 
     assert workspace_tmp / ".claude" / "commands" / "ingest.md" in command_targets
     assert workspace_tmp / ".roo" / "commands" / "ingest.md" not in command_targets
+    assert "skill" not in {item.kind for item in items}
 
 
 def test_build_install_plan_can_skip_agents_md(workspace_tmp: Path) -> None:

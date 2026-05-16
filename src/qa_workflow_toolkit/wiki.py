@@ -54,13 +54,6 @@ def build_wiki_init_items(target_dir: Path, wiki_name: str, agent: str) -> list[
                 _template(f"wiki/commands/{operation}.md"),
             )
         )
-        items.append(
-            WikiInitItem(
-                "skill",
-                target_dir / ".agents" / "skills" / operation / "SKILL.md",
-                _template(f"wiki/skills/{operation}/SKILL.md"),
-            )
-        )
     return items
 
 

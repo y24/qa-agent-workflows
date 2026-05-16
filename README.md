@@ -56,12 +56,6 @@ target-project/
 ├─ .temp/
 ├─ index.md
 ├─ log.md
-├─ .agents/
-│  └─ skills/
-│     ├─ ingest/
-│     ├─ query/
-│     ├─ lint/
-│     └─ convert/
 └─ <agent-command-dir>/
    └─ commands/
       ├─ ingest.md

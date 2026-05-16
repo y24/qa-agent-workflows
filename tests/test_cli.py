@@ -169,7 +169,7 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         )
 
         assert result.exit_code == 0
-        assert "Created 17 item(s)." in result.output
+        assert "Created 13 item(s)." in result.output
         assert (target / "AGENTS.md").is_file()
         assert (target / "raw" / ".gitkeep").is_file()
         assert (target / "wiki" / ".gitkeep").is_file()
@@ -180,7 +180,7 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         assert (target / ".roo" / "commands" / "query.md").is_file()
         assert (target / ".roo" / "commands" / "lint.md").is_file()
         assert (target / ".roo" / "commands" / "convert.md").is_file()
-        assert (target / ".agents" / "skills" / "ingest" / "SKILL.md").is_file()
+        assert not (target / ".agents" / "skills").exists()
         metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
         assert metadata["agent"] == "roocode"
         assert metadata["include_agents_md"] is False
@@ -188,7 +188,7 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         assert metadata["workflows"] == []
         assert "Research Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
         assert 'markitdown "<input>" -o "<output>"' in (
-            target / ".agents" / "skills" / "convert" / "SKILL.md"
+            target / ".roo" / "commands" / "convert.md"
         ).read_text(encoding="utf-8")
     finally:
         shutil.rmtree(target, ignore_errors=True)
