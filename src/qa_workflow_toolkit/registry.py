@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from .models import WorkflowManifest
-from .paths import asset_path
+from .paths import workflow_asset_path
 
 
 def _workflow_sort_key(workflow: WorkflowManifest) -> tuple[int, int, str]:
@@ -13,7 +13,7 @@ def _workflow_sort_key(workflow: WorkflowManifest) -> tuple[int, int, str]:
 
 
 def load_workflows() -> list[WorkflowManifest]:
-    workflows_root = asset_path("workflows")
+    workflows_root = workflow_asset_path("workflows")
     manifests: list[WorkflowManifest] = []
     for workflow_dir in workflows_root.iterdir():
         if not workflow_dir.is_dir():

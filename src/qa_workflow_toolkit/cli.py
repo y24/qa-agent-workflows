@@ -16,7 +16,15 @@ from .installer import (
 )
 from .models import CollisionAction, InstallPlanItem, UninstallPlanItem, WorkflowManifest
 from .registry import get_workflow, load_workflows
-from .state import InstalledWorkflow, load_installed_workflows, record_installed_workflows, remove_installed_workflows
+from .state import (
+    InstalledWorkflow,
+    RepositoryConfig,
+    load_installed_workflows,
+    load_repository_config,
+    record_installed_workflows,
+    record_repository_config,
+    remove_installed_workflows,
+)
 from .wiki import SUPPORTED_WIKI_AGENTS, build_wiki_init_items, init_wiki_from_items
 
 app = typer.Typer(invoke_without_command=True, no_args_is_help=False, add_completion=False)
@@ -43,7 +51,8 @@ def init_wiki(
     print_header()
     resolved_target = target.resolve()
     wiki_name = name or _resolve_wiki_name(resolved_target, yes)
-    selected_agent = agent or _resolve_wiki_agent(yes)
+    repository_config = load_repository_config(resolved_target)
+    selected_agent = agent or _resolve_wiki_agent(yes, repository_config)
     if selected_agent not in SUPPORTED_WIKI_AGENTS:
         raise typer.BadParameter(f"unsupported agent: {selected_agent}")
     plan = build_wiki_init_items(resolved_target, wiki_name, selected_agent)
@@ -55,6 +64,7 @@ def init_wiki(
         raise typer.Exit(1)
 
     result = init_wiki_from_items(plan, overwrite=overwrite, overwrite_targets=overwrite_targets)
+    record_repository_config(resolved_target, selected_agent)
     console.print(f"\n[green]Created {len(result.created)} item(s).[/green]")
     if result.overwritten:
         console.print(f"[yellow]Overwritten {len(result.overwritten)} item(s).[/yellow]")
@@ -95,7 +105,14 @@ def install(
     supported_agents = tuple(sorted(set.intersection(*(set(item.supported_agents) for item in selected_workflows))))
     resolved_target = target.resolve()
     installed_metadata = load_installed_workflows(resolved_target)
-    selected_agent = agent or _resolve_agent_choice(installed_metadata, selected_workflows, supported_agents, default_agent)
+    repository_config = load_repository_config(resolved_target)
+    selected_agent = agent or _resolve_agent_choice(
+        installed_metadata,
+        selected_workflows,
+        supported_agents,
+        default_agent,
+        repository_config,
+    )
     include_agents_md = _resolve_agents_md_choice(agents_md, yes, resolved_target, selected_agent, installed_metadata, selected_workflows)
 
     plan = _dedupe_plan(
@@ -251,8 +268,10 @@ def _resolve_wiki_name(target: Path, yes: bool) -> str:
     return str(selected).strip() or default_name
 
 
-def _resolve_wiki_agent(yes: bool) -> str:
+def _resolve_wiki_agent(yes: bool, repository_config: RepositoryConfig | None = None) -> str:
     default_agent = SUPPORTED_WIKI_AGENTS[0]
+    if repository_config is not None and repository_config.agent in SUPPORTED_WIKI_AGENTS:
+        return repository_config.agent
     if yes:
         return default_agent
     return _select_agent(SUPPORTED_WIKI_AGENTS, default_agent)
@@ -308,10 +327,13 @@ def _resolve_agent_choice(
     selected_workflows: list[WorkflowManifest],
     supported_agents: tuple[str, ...],
     default_agent: str,
+    repository_config: RepositoryConfig | None = None,
 ) -> str:
     saved_agent = _saved_metadata_value(installed_metadata, selected_workflows, "agent")
     if isinstance(saved_agent, str) and saved_agent in supported_agents:
         return saved_agent
+    if repository_config is not None and repository_config.agent in supported_agents:
+        return repository_config.agent
     return _select_agent(supported_agents, default_agent)
 
 

@@ -16,3 +16,7 @@ def asset_path(relative_path: str) -> Traversable:
         if part:
             current = current / part
     return current
+
+
+def workflow_asset_path(relative_path: str) -> Traversable:
+    return asset_path(f"workflow/{relative_path}")

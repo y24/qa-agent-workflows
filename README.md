@@ -94,4 +94,4 @@ RooCodeでは `/scenario-test-design docsフォルダの資料を参照してシ
 
 `workflow uninstall` はpackage assetsと完全一致するworkflow固有の `.agents/skills/<workflow>/` と `.roo/commands/<workflow>.md` を削除します。手動編集済みのファイルは削除せず、`--workflow all` の場合のみ共有ファイルも削除候補にします。
 
-workflow一覧の表示順は、各 `src/qa_workflow_toolkit/assets/workflows/<workflow>/workflow.json` の `sort_order` で制御します。未指定のworkflowは、`sort_order` 指定済みworkflowの後ろにID順で表示されます。
+workflow一覧の表示順は、各 `src/qa_workflow_toolkit/assets/workflow/workflows/<workflow>/workflow.json` の `sort_order` で制御します。未指定のworkflowは、`sort_order` 指定済みworkflowの後ろにID順で表示されます。

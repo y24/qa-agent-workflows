@@ -6,7 +6,7 @@ from pathlib import Path
 from importlib.resources.abc import Traversable
 
 from .models import CollisionAction, InstallPlanItem, InstallResult, UninstallPlanItem, UninstallResult, WorkflowManifest
-from .paths import asset_path
+from .paths import workflow_asset_path
 
 
 def build_install_plan(
@@ -66,7 +66,7 @@ def install_from_plan(plan: list[InstallPlanItem]) -> InstallResult:
             target = next_available_agents_path(item.target)
             renamed.append(target)
 
-        source = asset_path(item.source)
+        source = workflow_asset_path(item.source)
         _copy_resource(source, target, overwrite=action == CollisionAction.OVERWRITE)
         copied.append(target)
 
@@ -124,21 +124,21 @@ def next_available_agents_path(path: Path) -> Path:
 
 
 def asset_matches_path(source: str, target: Path) -> bool:
-    source_resource = asset_path(source)
+    source_resource = workflow_asset_path(source)
     if not source_resource.exists():
         raise FileNotFoundError(f"asset not found: {source}")
     return target.exists() and _resource_matches_path(source_resource, target)
 
 
 def asset_exactly_matches_path(source: str, target: Path) -> bool:
-    source_resource = asset_path(source)
+    source_resource = workflow_asset_path(source)
     if not source_resource.exists():
         raise FileNotFoundError(f"asset not found: {source}")
     return target.exists() and _resource_exactly_matches_path(source_resource, target)
 
 
 def _plan_item(kind: str, source: str, target: Path) -> InstallPlanItem:
-    source_resource = asset_path(source)
+    source_resource = workflow_asset_path(source)
     if not source_resource.exists():
         raise FileNotFoundError(f"asset not found: {source}")
     action = CollisionAction.NO_CHANGE if asset_matches_path(source, target) else None
@@ -153,7 +153,7 @@ def _plan_item(kind: str, source: str, target: Path) -> InstallPlanItem:
 
 
 def _uninstall_plan_item(kind: str, source: str, target: Path) -> UninstallPlanItem:
-    source_resource = asset_path(source)
+    source_resource = workflow_asset_path(source)
     if not source_resource.exists():
         raise FileNotFoundError(f"asset not found: {source}")
     return UninstallPlanItem(

@@ -37,12 +37,13 @@ qa-agent-workflows/
       registry.py
       models.py
       assets/
-        agents/roocode/AGENTS.md
-        shared/
-        workflows/<workflow>/
-          workflow.json
-          skill/
-        commands/roocode/<workflow>.md
+        workflow/
+          agents/roocode/AGENTS.md
+          shared/
+          workflows/<workflow>/
+            workflow.json
+            skill/
+          commands/roocode/<workflow>.md
   tests/
   docs/
     skill-authoring/
@@ -85,7 +86,7 @@ qa-agent-workflows/
 ## Change Policy
 
 - 既存のステップID、成果物ID、参照IDは可能な限り維持する。
-- 共通ルールは package assets の `assets/shared/`、skill固有ルールは該当 workflow の `skill/references/` に置き、責務の重複を増やさない。
+- 共通ルールは package assets の `assets/workflow/shared/`、skill固有ルールは該当 workflow の `skill/references/` に置き、責務の重複を増やさない。
 - skill の追加・再構成時の詳細方針は `docs/skill-authoring/` に置く。
 - CLI本体にworkflow固有の手順や判断基準を埋め込まない。workflow固有情報は `workflow.json` と asset markdown に閉じ込める。
 - 既存ファイルを無確認で上書きする挙動を追加しない。`--yes` は明示指定時のみ上書きに使う。

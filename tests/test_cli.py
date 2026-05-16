@@ -94,6 +94,9 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         assert (target / ".roo" / "commands" / "lint.md").is_file()
         assert (target / ".roo" / "commands" / "convert.md").is_file()
         assert (target / ".agents" / "skills" / "ingest" / "SKILL.md").is_file()
+        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+        assert metadata["agent"] == "roocode"
+        assert metadata["workflows"] == []
         assert "Research Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
         assert 'markitdown "<input>" -o "<output>"' in (
             target / ".agents" / "skills" / "convert" / "SKILL.md"
@@ -111,6 +114,55 @@ def test_wiki_init_uses_target_folder_name_by_default_with_yes() -> None:
         assert result.exit_code == 0
         assert f"# {target.name} LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
         assert "Select target agent" not in result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_workflow_install_reuses_agent_recorded_by_wiki_init(monkeypatch: pytest.MonkeyPatch) -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-agent-reuse-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        wiki_result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--name",
+                "Reuse Wiki",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        def fail_questionary():
+            raise AssertionError("questionary should not be called when wiki init recorded the agent")
+
+        monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", fail_questionary)
+
+        install_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--target",
+                str(target),
+                "--no-agents-md",
+                "--yes",
+            ],
+        )
+
+        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+
+        assert wiki_result.exit_code == 0
+        assert install_result.exit_code == 0
+        assert metadata["agent"] == "roocode"
+        assert metadata["workflows"][0]["workflow_id"] == "scenario-test-design"
+        assert "Select target agent" not in install_result.output
     finally:
         shutil.rmtree(target, ignore_errors=True)
 

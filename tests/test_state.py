@@ -5,7 +5,14 @@ import uuid
 
 import pytest
 
-from qa_workflow_toolkit.state import InstalledWorkflow, load_installed_workflows, remove_installed_workflows, save_installed_workflows
+from qa_workflow_toolkit.state import (
+    InstalledWorkflow,
+    load_installed_workflows,
+    load_repository_config,
+    record_repository_config,
+    remove_installed_workflows,
+    save_installed_workflows,
+)
 
 
 @pytest.fixture()
@@ -107,3 +114,16 @@ def test_load_installed_workflows_reads_top_level_agent_config(workspace_tmp) ->
 
     assert installed["scenario-test-design"].agent == "roocode"
     assert installed["scenario-test-design"].include_agents_md is False
+
+
+def test_record_repository_config_can_store_agent_without_workflows(workspace_tmp) -> None:
+    record_repository_config(workspace_tmp, "roocode")
+
+    data = json.loads((workspace_tmp / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+    config = load_repository_config(workspace_tmp)
+
+    assert data["agent"] == "roocode"
+    assert data["workflows"] == []
+    assert config is not None
+    assert config.agent == "roocode"
+    assert load_installed_workflows(workspace_tmp) == {}

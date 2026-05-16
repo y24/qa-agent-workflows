@@ -141,24 +141,25 @@ qa-workflow-toolkit/
 │     ├─ models.py
 │     ├─ paths.py
 │     └─ assets/
-│        ├─ agents/
-│        │  └─ roocode/
-│        │     └─ AGENTS.md
-│        ├─ shared/
-│        │  ├─ common_contract.md
-│        │  ├─ evidence_and_confidence_policy.md
-│        │  ├─ ambiguity_and_issue_log_policy.md
-│        │  ├─ traceability_policy.md
-│        │  ├─ review_gate_policy.md
-│        │  ├─ output_location_policy.md
-│        │  └─ terminology.md
-│        ├─ workflows/
-│        │  ├─ scenario-test-design/
-│        │  └─ risk-based-test-design/
-│        └─ commands/
-│           └─ roocode/
-│              ├─ scenario-test-design.md
-│              └─ risk-based-test-design.md
+│        └─ workflow/
+│           ├─ agents/
+│           │  └─ roocode/
+│           │     └─ AGENTS.md
+│           ├─ shared/
+│           │  ├─ common_contract.md
+│           │  ├─ evidence_and_confidence_policy.md
+│           │  ├─ ambiguity_and_issue_log_policy.md
+│           │  ├─ traceability_policy.md
+│           │  ├─ review_gate_policy.md
+│           │  ├─ output_location_policy.md
+│           │  └─ terminology.md
+│           ├─ workflows/
+│           │  ├─ scenario-test-design/
+│           │  └─ risk-based-test-design/
+│           └─ commands/
+│              └─ roocode/
+│                 ├─ scenario-test-design.md
+│                 └─ risk-based-test-design.md
 └─ tests/
    ├─ test_cli.py
    ├─ test_registry.py
@@ -441,16 +442,16 @@ qatool workflow list --installed
 選択されたワークフローに対して、以下をコピーする。
 
 ```text
-assets/agents/roocode/AGENTS.md
+assets/workflow/agents/roocode/AGENTS.md
   → AGENTS.md
 
-assets/shared/**
+assets/workflow/shared/**
   → .agents/shared/**
 
-assets/workflows/<workflow>/skill/**
+assets/workflow/workflows/<workflow>/skill/**
   → .agents/skills/<workflow>/**
 
-assets/commands/roocode/<workflow>.md
+assets/workflow/commands/roocode/<workflow>.md
   → .roo/commands/<workflow>.md
 ```
 
@@ -714,7 +715,7 @@ AGENTS.md
 
 実装内容:
 
-- `assets/workflows/*/workflow.json` を読み込む
+- `assets/workflow/workflows/*/workflow.json` を読み込む
 - manifestを検証する
 - ワークフロー一覧を返す
 
@@ -752,10 +753,10 @@ AGENTS.md
 移植先:
 
 ```text
-assets/workflows/scenario-test-design/skill/
-assets/commands/roocode/scenario-test-design.md
-assets/shared/
-assets/agents/roocode/AGENTS.md
+assets/workflow/workflows/scenario-test-design/skill/
+assets/workflow/commands/roocode/scenario-test-design.md
+assets/workflow/shared/
+assets/workflow/agents/roocode/AGENTS.md
 ```
 
 既存アセット内の参照パスを修正する。
