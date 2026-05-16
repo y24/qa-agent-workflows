@@ -95,3 +95,19 @@ class InstallResult:
     copied: tuple[Path, ...]
     skipped: tuple[Path, ...]
     renamed: tuple[Path, ...]
+
+
+@dataclass(frozen=True)
+class UninstallPlanItem:
+    kind: str
+    source: str
+    target: Path
+    exists: bool
+    is_dir: bool
+    safe_to_remove: bool
+
+
+@dataclass(frozen=True)
+class UninstallResult:
+    removed: tuple[Path, ...]
+    skipped: tuple[Path, ...]

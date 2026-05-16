@@ -6,9 +6,12 @@ import pytest
 
 from qa_workflow_toolkit.installer import (
     apply_default_actions,
+    asset_exactly_matches_path,
     build_install_plan,
+    build_uninstall_plan,
     install_from_plan,
     next_available_agents_path,
+    uninstall_from_plan,
 )
 from qa_workflow_toolkit.models import CollisionAction
 from qa_workflow_toolkit.registry import get_workflow
@@ -76,6 +79,47 @@ def test_install_skips_no_change_items(workspace_tmp: Path) -> None:
 
     assert result.copied == ()
     assert len(result.skipped) == 4
+
+
+def test_uninstall_removes_matching_workflow_assets(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    initial_plan = apply_default_actions(build_install_plan(workflow, workspace_tmp, "roocode"), CollisionAction.OVERWRITE)
+    install_from_plan(initial_plan)
+    plan = build_uninstall_plan(workflow, workspace_tmp, "roocode")
+
+    result = uninstall_from_plan(plan)
+
+    assert len(result.removed) == 2
+    assert not (workspace_tmp / ".agents" / "skills" / "scenario-test-design").exists()
+    assert not (workspace_tmp / ".roo" / "commands" / "scenario-test-design.md").exists()
+    assert (workspace_tmp / ".agents" / "shared" / "common_contract.md").is_file()
+    assert (workspace_tmp / "AGENTS.md").is_file()
+
+
+def test_uninstall_skips_modified_assets(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    initial_plan = apply_default_actions(build_install_plan(workflow, workspace_tmp, "roocode"), CollisionAction.OVERWRITE)
+    install_from_plan(initial_plan)
+    command_path = workspace_tmp / ".roo" / "commands" / "scenario-test-design.md"
+    command_path.write_text("modified", encoding="utf-8")
+    plan = build_uninstall_plan(workflow, workspace_tmp, "roocode")
+
+    result = uninstall_from_plan(plan)
+
+    assert command_path in result.skipped
+    assert command_path.is_file()
+
+
+def test_asset_exactly_matches_path_rejects_extra_directory_files(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    initial_plan = apply_default_actions(build_install_plan(workflow, workspace_tmp, "roocode"), CollisionAction.OVERWRITE)
+    install_from_plan(initial_plan)
+    (workspace_tmp / ".agents" / "skills" / "scenario-test-design" / "extra.md").write_text("extra", encoding="utf-8")
+
+    assert not asset_exactly_matches_path(
+        workflow.install.skill.source,
+        workspace_tmp / ".agents" / "skills" / "scenario-test-design",
+    )
 
 
 def test_next_available_agents_path(workspace_tmp: Path) -> None:

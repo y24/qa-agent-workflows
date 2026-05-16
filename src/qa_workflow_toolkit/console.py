@@ -7,7 +7,7 @@ from rich.markup import escape
 from rich.table import Table
 from rich.text import Text
 
-from .models import InstallPlanItem, WorkflowManifest
+from .models import InstallPlanItem, UninstallPlanItem, WorkflowManifest
 
 console = Console()
 
@@ -44,11 +44,15 @@ def print_usage() -> None:
     print_header()
     console.print("[bold]Usage[/bold]")
     console.print("  qatool workflow install    Install QA workflow assets into current folder")
+    console.print("  qatool workflow update     Update installed QA workflow assets")
+    console.print("  qatool workflow uninstall  Remove installed QA workflow assets")
     console.print("  qatool workflow list       Show available workflows\n")
     console.print("[bold]Examples[/bold]")
     console.print("  qatool workflow install")
     console.print("  qatool workflow install --workflow scenario-test-design --agent roocode --yes")
     console.print("  qatool workflow install --workflow all --agent roocode --yes")
+    console.print("  qatool workflow update --workflow all --agent roocode --yes")
+    console.print("  qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes")
 
 
 def print_workflow_list(workflows: list[WorkflowManifest]) -> None:
@@ -67,6 +71,22 @@ def print_plan(plan: list[InstallPlanItem]) -> None:
     table.add_column("Action")
     for item in plan:
         table.add_row(item.kind, str(item.target), "yes" if item.exists else "no", _plan_action_label(item))
+    console.print(table)
+
+
+def print_uninstall_plan(plan: list[UninstallPlanItem]) -> None:
+    table = Table(title="Uninstall plan")
+    table.add_column("Kind")
+    table.add_column("Target")
+    table.add_column("Exists")
+    table.add_column("Action")
+    for item in plan:
+        table.add_row(
+            item.kind,
+            str(item.target),
+            "yes" if item.exists else "no",
+            "remove" if item.safe_to_remove else "skip",
+        )
     console.print(table)
 
 

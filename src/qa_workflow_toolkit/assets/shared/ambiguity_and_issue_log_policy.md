@@ -1,5 +1,5 @@
 # Ambiguity And Issue Log Policy
-
+sss
 ## Purpose
 
 曖昧さ、矛盾、証拠不足、未解決の前提を隠さず扱うための共通方針を定義する。

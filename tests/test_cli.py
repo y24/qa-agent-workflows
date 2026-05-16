@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import shutil
 import uuid
 
@@ -91,6 +92,36 @@ def test_install_can_skip_agents_md() -> None:
         shutil.rmtree(target, ignore_errors=True)
 
 
+def test_install_records_workflow_metadata() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "risk-based-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--no-agents-md",
+                "--yes",
+            ],
+        )
+        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+
+        assert result.exit_code == 0
+        assert metadata["schema_version"] == 1
+        assert metadata["workflows"][0]["workflow_id"] == "risk-based-test-design"
+        assert metadata["workflows"][0]["agent"] == "roocode"
+        assert metadata["workflows"][0]["include_agents_md"] is False
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
 def test_install_outputs_no_change_for_matching_existing_assets() -> None:
     target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
     target.mkdir(parents=True)
@@ -129,6 +160,150 @@ def test_install_outputs_no_change_for_matching_existing_assets() -> None:
         assert "no change" in second_result.output
         assert "Installed 0 item(s)." in second_result.output
         assert "Skipped 4 item(s)." in second_result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_update_overwrites_installed_assets() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        install_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        command_path = target / ".roo" / "commands" / "scenario-test-design.md"
+        command_path.write_text("modified", encoding="utf-8")
+        update_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "update",
+                "--workflow",
+                "scenario-test-design",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        assert install_result.exit_code == 0
+        assert update_result.exit_code == 0
+        assert "Updated 1 item(s)." in update_result.output
+        assert "no change" not in update_result.output
+        assert "Select target agent" not in update_result.output
+        assert "modified" not in command_path.read_text(encoding="utf-8")
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_update_asks_once_without_per_file_collision_prompts(monkeypatch: pytest.MonkeyPatch) -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    prompts: list[str] = []
+
+    class ConfirmPrompt:
+        def __init__(self, message: str) -> None:
+            self.message = message
+
+        def ask(self) -> bool:
+            prompts.append(self.message)
+            return True
+
+    class FakeQuestionary:
+        @staticmethod
+        def confirm(message: str, default: bool = True) -> ConfirmPrompt:
+            return ConfirmPrompt(message)
+
+    try:
+        install_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        command_path = target / ".roo" / "commands" / "scenario-test-design.md"
+        command_path.write_text("modified", encoding="utf-8")
+        monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+        update_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "update",
+                "--workflow",
+                "scenario-test-design",
+                "--target",
+                str(target),
+                "--agents-md",
+            ],
+        )
+
+        assert install_result.exit_code == 0
+        assert update_result.exit_code == 0
+        assert prompts == ["Update these files?"]
+        assert "Updated 1 item(s)." in update_result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_uninstall_removes_workflow_specific_assets() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        install_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        uninstall_result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "uninstall",
+                "--workflow",
+                "scenario-test-design",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        assert install_result.exit_code == 0
+        assert uninstall_result.exit_code == 0
+        assert "Removed 2 item(s)." in uninstall_result.output
+        assert not (target / ".agents" / "skills" / "scenario-test-design").exists()
+        assert not (target / ".roo" / "commands" / "scenario-test-design.md").exists()
+        assert (target / "AGENTS.md").is_file()
     finally:
         shutil.rmtree(target, ignore_errors=True)
 

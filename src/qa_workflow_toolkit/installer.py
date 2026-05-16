@@ -5,7 +5,7 @@ from pathlib import Path
 
 from importlib.resources.abc import Traversable
 
-from .models import CollisionAction, InstallPlanItem, InstallResult, WorkflowManifest
+from .models import CollisionAction, InstallPlanItem, InstallResult, UninstallPlanItem, UninstallResult, WorkflowManifest
 from .paths import asset_path
 
 
@@ -73,6 +73,45 @@ def install_from_plan(plan: list[InstallPlanItem]) -> InstallResult:
     return InstallResult(copied=tuple(copied), skipped=tuple(skipped), renamed=tuple(renamed))
 
 
+def build_uninstall_plan(
+    workflow: WorkflowManifest,
+    target_dir: Path,
+    agent: str,
+    include_shared: bool = False,
+    include_agents_md: bool = False,
+) -> list[UninstallPlanItem]:
+    if agent not in workflow.supported_agents:
+        raise ValueError(f"{workflow.id} does not support agent: {agent}")
+
+    items: list[UninstallPlanItem] = []
+    if include_agents_md and workflow.install.agents_md:
+        items.append(_uninstall_plan_item("agents_md", f"agents/{agent}/AGENTS.md", target_dir / "AGENTS.md"))
+    if include_shared:
+        items.append(_uninstall_plan_item("shared", workflow.install.shared.source, target_dir / workflow.install.shared.target))
+
+    items.append(_uninstall_plan_item("skill", workflow.install.skill.source, target_dir / workflow.install.skill.target))
+    items.append(_uninstall_plan_item("command", workflow.install.command.source, target_dir / workflow.install.command.target))
+    return items
+
+
+def uninstall_from_plan(plan: list[UninstallPlanItem]) -> UninstallResult:
+    removed: list[Path] = []
+    skipped: list[Path] = []
+
+    for item in plan:
+        if not item.exists or not item.safe_to_remove:
+            skipped.append(item.target)
+            continue
+
+        if item.is_dir:
+            shutil.rmtree(item.target)
+        else:
+            item.target.unlink()
+        removed.append(item.target)
+
+    return UninstallResult(removed=tuple(removed), skipped=tuple(skipped))
+
+
 def next_available_agents_path(path: Path) -> Path:
     for index in range(1, 1000):
         candidate = path.with_name(f"{path.stem}_{index}{path.suffix}")
@@ -88,6 +127,13 @@ def asset_matches_path(source: str, target: Path) -> bool:
     return target.exists() and _resource_matches_path(source_resource, target)
 
 
+def asset_exactly_matches_path(source: str, target: Path) -> bool:
+    source_resource = asset_path(source)
+    if not source_resource.exists():
+        raise FileNotFoundError(f"asset not found: {source}")
+    return target.exists() and _resource_exactly_matches_path(source_resource, target)
+
+
 def _plan_item(kind: str, source: str, target: Path) -> InstallPlanItem:
     source_resource = asset_path(source)
     if not source_resource.exists():
@@ -100,6 +146,20 @@ def _plan_item(kind: str, source: str, target: Path) -> InstallPlanItem:
         exists=target.exists(),
         is_dir=source_resource.is_dir(),
         action=action,
+    )
+
+
+def _uninstall_plan_item(kind: str, source: str, target: Path) -> UninstallPlanItem:
+    source_resource = asset_path(source)
+    if not source_resource.exists():
+        raise FileNotFoundError(f"asset not found: {source}")
+    return UninstallPlanItem(
+        kind=kind,
+        source=source,
+        target=target,
+        exists=target.exists(),
+        is_dir=source_resource.is_dir(),
+        safe_to_remove=asset_exactly_matches_path(source, target),
     )
 
 
@@ -125,6 +185,22 @@ def _resource_matches_path(source: Traversable, target: Path) -> bool:
             return False
         source_children = sorted(source.iterdir(), key=lambda child: child.name)
         return all(_resource_matches_path(source_child, target / source_child.name) for source_child in source_children)
+
+    if not target.is_file():
+        return False
+    with source.open("rb") as source_file, target.open("rb") as target_file:
+        return source_file.read() == target_file.read()
+
+
+def _resource_exactly_matches_path(source: Traversable, target: Path) -> bool:
+    if source.is_dir():
+        if not target.is_dir():
+            return False
+        source_children = sorted(source.iterdir(), key=lambda child: child.name)
+        target_children = sorted(target.iterdir(), key=lambda child: child.name)
+        if [child.name for child in source_children] != [child.name for child in target_children]:
+            return False
+        return all(_resource_exactly_matches_path(source_child, target / source_child.name) for source_child in source_children)
 
     if not target.is_file():
         return False
