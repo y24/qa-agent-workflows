@@ -39,7 +39,8 @@ app.add_typer(wiki_app, name="wiki")
 @app.callback()
 def callback(ctx: typer.Context) -> None:
     if ctx.invoked_subcommand is None:
-        print_usage()
+        _interactive_menu()
+        raise typer.Exit()
 
 
 @wiki_app.command("init")
@@ -50,7 +51,18 @@ def init_wiki(
     yes: bool = typer.Option(False, "--yes", "-y", help="Overwrite existing generated files without prompting."),
 ) -> None:
     """Initialize an LLM wiki in a project."""
-    print_header()
+    _run_wiki_init(name=name, agent=agent, target=target, yes=yes, show_header=True)
+
+
+def _run_wiki_init(
+    name: Optional[str],
+    agent: Optional[str],
+    target: Path,
+    yes: bool,
+    show_header: bool,
+) -> None:
+    if show_header:
+        print_header()
     resolved_target = target.resolve()
     wiki_name = name or _resolve_wiki_name(resolved_target, yes)
     repository_config = load_repository_config(resolved_target)
@@ -82,7 +94,12 @@ def init_wiki(
 @workflow_app.command("list")
 def list_workflows() -> None:
     """Show available workflows."""
-    print_header()
+    _run_workflow_list(show_header=True)
+
+
+def _run_workflow_list(show_header: bool) -> None:
+    if show_header:
+        print_header()
     print_workflow_list(load_workflows())
 
 
@@ -99,7 +116,19 @@ def install(
     ),
 ) -> None:
     """Install QA workflow assets into a project."""
-    print_header()
+    _run_workflow_install(workflow=workflow, agent=agent, target=target, yes=yes, agents_md=agents_md, show_header=True)
+
+
+def _run_workflow_install(
+    workflow: Optional[str],
+    agent: Optional[str],
+    target: Path,
+    yes: bool,
+    agents_md: Optional[bool],
+    show_header: bool,
+) -> None:
+    if show_header:
+        print_header()
     workflows = load_workflows()
     selected_workflow_id = workflow or _select_workflow(workflows)
     selected_workflows = workflows if selected_workflow_id == "all" else [get_workflow(selected_workflow_id)]
@@ -162,7 +191,18 @@ def update(
     ),
 ) -> None:
     """Update installed QA workflow assets in a project."""
-    print_header()
+    _run_workflow_update(workflow=workflow, target=target, yes=yes, agents_md=agents_md, show_header=True)
+
+
+def _run_workflow_update(
+    workflow: Optional[str],
+    target: Path,
+    yes: bool,
+    agents_md: Optional[bool],
+    show_header: bool,
+) -> None:
+    if show_header:
+        print_header()
     workflows = load_workflows()
     resolved_target = target.resolve()
     selected_workflow_id = workflow or "all"
@@ -218,7 +258,18 @@ def uninstall(
     yes: bool = typer.Option(False, "--yes", "-y", help="Remove matching generated assets without prompting."),
 ) -> None:
     """Uninstall QA workflow assets from a project."""
-    print_header()
+    _run_workflow_uninstall(workflow=workflow, agent=agent, target=target, yes=yes, show_header=True)
+
+
+def _run_workflow_uninstall(
+    workflow: Optional[str],
+    agent: Optional[str],
+    target: Path,
+    yes: bool,
+    show_header: bool,
+) -> None:
+    if show_header:
+        print_header()
     workflows = load_workflows()
     resolved_target = target.resolve()
     installed_workflows = _installed_workflows(workflows, resolved_target)
@@ -258,6 +309,72 @@ def uninstall(
     console.print(f"\n[green]Removed {len(result.removed)} item(s).[/green]")
     if result.skipped:
         console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
+
+
+def _interactive_menu() -> None:
+    print_header()
+    questionary = _questionary()
+    selected_command = questionary.select(
+        "Select command",
+        choices=[
+            questionary.Choice("workflow - QA workflow assets のインストール、更新、削除、一覧表示", value="workflow"),
+            questionary.Choice("wiki - LLM wiki assets の初期化", value="wiki"),
+            questionary.Choice("help - 利用できるコマンドと実行例を表示", value="help"),
+        ],
+    ).ask()
+    if not selected_command:
+        raise typer.Exit(1)
+
+    if selected_command == "workflow":
+        _interactive_workflow_menu(questionary)
+        return
+    if selected_command == "wiki":
+        _interactive_wiki_menu(questionary)
+        return
+    print_usage(show_header=False)
+
+
+def _interactive_workflow_menu(questionary) -> None:
+    selected_operation = questionary.select(
+        "Select workflow operation",
+        choices=[
+            questionary.Choice("install - QA workflow assets を対象プロジェクトへ配置", value="install"),
+            questionary.Choice("update - インストール済みの workflow assets を最新版で更新", value="update"),
+            questionary.Choice("uninstall - インストール済みの workflow assets を削除", value="uninstall"),
+            questionary.Choice("list - 利用可能な workflow 一覧を表示", value="list"),
+            questionary.Choice("help - workflow コマンドのヘルプを表示", value="help"),
+        ],
+    ).ask()
+    if not selected_operation:
+        raise typer.Exit(1)
+
+    if selected_operation == "install":
+        _run_workflow_install(workflow=None, agent=None, target=Path.cwd(), yes=False, agents_md=None, show_header=False)
+    elif selected_operation == "update":
+        _run_workflow_update(workflow=None, target=Path.cwd(), yes=False, agents_md=None, show_header=False)
+    elif selected_operation == "uninstall":
+        _run_workflow_uninstall(workflow=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
+    elif selected_operation == "list":
+        _run_workflow_list(show_header=False)
+    else:
+        print_usage(show_header=False)
+
+
+def _interactive_wiki_menu(questionary) -> None:
+    selected_operation = questionary.select(
+        "Select wiki operation",
+        choices=[
+            questionary.Choice("init - 現在のフォルダに LLM wiki assets を初期化", value="init"),
+            questionary.Choice("help - wiki コマンドのヘルプを表示", value="help"),
+        ],
+    ).ask()
+    if not selected_operation:
+        raise typer.Exit(1)
+
+    if selected_operation == "init":
+        _run_wiki_init(name=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
+    else:
+        print_usage(show_header=False)
 
 
 def _resolve_wiki_name(target: Path, yes: bool) -> str:

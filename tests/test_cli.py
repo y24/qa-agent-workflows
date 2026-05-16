@@ -32,6 +32,93 @@ def test_list_outputs_workflows_without_table() -> None:
     assert "┃" not in result.output
 
 
+def test_no_args_opens_interactive_menu_and_can_show_help(monkeypatch: pytest.MonkeyPatch) -> None:
+    prompts: list[str] = []
+    choice_titles: list[list[str]] = []
+
+    class FakeChoice:
+        def __init__(self, title: str, value: str) -> None:
+            self.title = title
+            self.value = value
+
+    class SelectPrompt:
+        def __init__(self, message: str, choices: list[FakeChoice]) -> None:
+            self.message = message
+            self.choices = choices
+
+        def ask(self) -> str:
+            prompts.append(self.message)
+            choice_titles.append([choice.title for choice in self.choices])
+            return "help"
+
+    class FakeQuestionary:
+        Choice = FakeChoice
+
+        @staticmethod
+        def select(message: str, choices: list[FakeChoice], default: str | None = None) -> SelectPrompt:
+            return SelectPrompt(message, choices)
+
+    monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+    result = CliRunner().invoke(app, [])
+
+    assert result.exit_code == 0
+    assert prompts == ["Select command"]
+    assert choice_titles == [
+        [
+            "workflow - QA workflow assets のインストール、更新、削除、一覧表示",
+            "wiki - LLM wiki assets の初期化",
+            "help - 利用できるコマンドと実行例を表示",
+        ]
+    ]
+    assert "___      _       _____ ___" in result.output
+    assert "Usage" in result.output
+
+
+def test_interactive_workflow_list_shows_operation_menu(monkeypatch: pytest.MonkeyPatch) -> None:
+    responses = ["workflow", "list"]
+    prompts: list[str] = []
+    choice_titles: list[list[str]] = []
+
+    class FakeChoice:
+        def __init__(self, title: str, value: str) -> None:
+            self.title = title
+            self.value = value
+
+    class SelectPrompt:
+        def __init__(self, message: str, choices: list[FakeChoice]) -> None:
+            self.message = message
+            self.choices = choices
+
+        def ask(self) -> str:
+            prompts.append(self.message)
+            choice_titles.append([choice.title for choice in self.choices])
+            return responses.pop(0)
+
+    class FakeQuestionary:
+        Choice = FakeChoice
+
+        @staticmethod
+        def select(message: str, choices: list[FakeChoice], default: str | None = None) -> SelectPrompt:
+            return SelectPrompt(message, choices)
+
+    monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+    result = CliRunner().invoke(app, [])
+
+    assert result.exit_code == 0
+    assert prompts == ["Select command", "Select workflow operation"]
+    assert choice_titles[1] == [
+        "install - QA workflow assets を対象プロジェクトへ配置",
+        "update - インストール済みの workflow assets を最新版で更新",
+        "uninstall - インストール済みの workflow assets を削除",
+        "list - 利用可能な workflow 一覧を表示",
+        "help - workflow コマンドのヘルプを表示",
+    ]
+    assert "Available workflows" in result.output
+    assert "scenario-test-design - シナリオテスト設計" in result.output
+
+
 def test_install_outputs_example_prompt() -> None:
     target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
     target.mkdir(parents=True)

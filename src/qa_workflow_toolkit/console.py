@@ -41,8 +41,9 @@ def _gradient_color(ratio: float) -> str:
     return f"#{red:02x}{green:02x}{blue:02x}"
 
 
-def print_usage() -> None:
-    print_header()
+def print_usage(show_header: bool = True) -> None:
+    if show_header:
+        print_header()
     console.print("[bold]Usage[/bold]")
     console.print("  qatool wiki init           Initialize an LLM wiki in current folder")
     console.print("  qatool workflow install    Install QA workflow assets into current folder")
