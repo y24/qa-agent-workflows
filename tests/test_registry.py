@@ -22,6 +22,7 @@ def test_load_workflows_uses_manifest_sort_order() -> None:
         "defect-analysis",
         "test-design-review",
         "nonfunctional-quality-criteria-planning",
+        "system-test-strategy-planning",
     ]
 
 

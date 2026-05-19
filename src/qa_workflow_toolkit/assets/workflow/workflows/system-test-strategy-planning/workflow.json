@@ -1,0 +1,17 @@
+{
+  "id": "system-test-strategy-planning",
+  "display_name": "システムテスト戦略策定",
+  "description": "開発文書を根拠に、システムテストでカバーすべき非機能、テスト種別、テスト観点、品質特性マトリクスを整理する",
+  "version": "0.1.0",
+  "sort_order": 800,
+  "skill_name": "system-test-strategy-planning",
+  "command_name": "system-test-strategy-planning",
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/system-test-strategy-planning/skill", "target": ".agents/skills/system-test-strategy-planning"},
+    "command": {"source": "commands/system-test-strategy-planning.md", "target": ".roo/commands/system-test-strategy-planning.md"}
+  },
+  "post_install_message": "/system-test-strategy-planning <入力資料>"
+}

@@ -30,3 +30,4 @@
 | `$scenario-test-design` | `Flow ID -> Viewpoint ID -> Scenario ID -> TC ID` |
 | `$testcase-viewpoint-extraction` | `TC ID -> Intent ID -> Candidate ID -> Viewpoint ID` |
 | `$risk-based-test-design` | `Risk ID -> Viewpoint ID -> TC ID` |
+| `$system-test-strategy-planning` | `Input ID -> Source Fact ID -> Coverage ID -> Test Type ID -> Viewpoint ID` |
