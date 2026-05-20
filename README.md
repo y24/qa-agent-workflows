@@ -178,5 +178,4 @@ target-project/
 | `/convert` | `.temp/` に置いた変換前ファイルを `markitdown` コマンドでMarkdown化し、`raw/` に配置します。 |
 | `/ingest` | `raw/` のソースを読み、根拠を保ったまま `wiki/`、`index.md`、`log.md` に統合します。 |
 | `/query` | `index.md` と `wiki/` の関連ページを優先して質問に回答し、根拠と未確認事項を示します。 |
-| `/lint` | wikiの矛盾、根拠不足、索引漏れ、孤立ページ、古い記述、未解決事項を点検します。 |
-
+| `/lint` | wikiの矛盾、索引漏れ、孤立ページ、古い記述などを点検します。 |
