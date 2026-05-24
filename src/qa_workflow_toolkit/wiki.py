@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 
 from .agents import get_agent_spec, supported_agent_ids
 from .paths import asset_path
@@ -30,6 +31,10 @@ class WikiInitResult:
     skipped: tuple[Path, ...]
 
 
+WIKI_NAME_PATTERN = re.compile(r"<!--\s*wiki-name:\s*(.*?)\s*-->")
+WIKI_HEADING_PATTERN = re.compile(r"^#\s+(.+?)\s+LLM Wiki\s*$", re.MULTILINE)
+
+
 def build_wiki_init_items(target_dir: Path, wiki_name: str, agent: str) -> list[WikiInitItem]:
     if agent not in SUPPORTED_WIKI_AGENTS:
         raise ValueError(f"unsupported wiki agent: {agent}")
@@ -55,6 +60,31 @@ def build_wiki_init_items(target_dir: Path, wiki_name: str, agent: str) -> list[
             )
         )
     return items
+
+
+def build_wiki_update_items(target_dir: Path, wiki_name: str, agent: str) -> list[WikiInitItem]:
+    if agent not in SUPPORTED_WIKI_AGENTS:
+        raise ValueError(f"unsupported wiki agent: {agent}")
+
+    agent_spec = get_agent_spec(agent)
+    items = [
+        WikiInitItem("agents_md", target_dir / "AGENTS.md", _template("wiki/AGENTS.md", wiki_name=wiki_name)),
+    ]
+    for operation in WIKI_OPERATIONS:
+        items.append(
+            WikiInitItem(
+                "command",
+                target_dir / agent_spec.command_target_dir / f"{operation}.md",
+                _template(f"wiki/commands/{operation}.md"),
+            )
+        )
+    return items
+
+
+def wiki_item_matches_target(item: WikiInitItem) -> bool:
+    if item.is_dir:
+        return item.target.is_dir()
+    return item.target.is_file() and item.target.read_text(encoding="utf-8") == (item.content or "")
 
 
 def init_wiki_from_items(
@@ -90,6 +120,30 @@ def init_wiki_from_items(
             created.append(item.target)
 
     return WikiInitResult(created=tuple(created), overwritten=tuple(overwritten), skipped=tuple(skipped))
+
+
+def resolve_existing_wiki_name(target_dir: Path) -> str:
+    agents_md = target_dir / "AGENTS.md"
+    if agents_md.is_file():
+        content = agents_md.read_text(encoding="utf-8")
+        metadata_match = WIKI_NAME_PATTERN.search(content)
+        if metadata_match and metadata_match.group(1).strip():
+            return metadata_match.group(1).strip()
+        heading_match = WIKI_HEADING_PATTERN.search(content)
+        if heading_match and heading_match.group(1).strip():
+            return heading_match.group(1).strip()
+    return target_dir.name or "llm-wiki"
+
+
+def is_wiki_initialized(target_dir: Path) -> bool:
+    agents_md = target_dir / "AGENTS.md"
+    if agents_md.is_file():
+        content = agents_md.read_text(encoding="utf-8")
+        if "wiki-name:" in content or "LLM Wiki" in content:
+            return True
+    if any((target_dir / get_agent_spec(agent).command_target_dir / "ingest.md").is_file() for agent in SUPPORTED_WIKI_AGENTS):
+        return True
+    return (target_dir / "wiki").is_dir() and (target_dir / "raw").is_dir()
 
 
 def _template(relative_path: str, **replacements: str) -> str:

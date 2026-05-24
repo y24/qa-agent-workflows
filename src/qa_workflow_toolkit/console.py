@@ -46,6 +46,7 @@ def print_usage(show_header: bool = True) -> None:
         print_header()
     console.print("[bold]Usage[/bold]")
     console.print("  qatool wiki init           Initialize an LLM wiki in current folder")
+    console.print("  qatool wiki update         Update installed LLM wiki assets")
     console.print("  qatool workflow install    Install QA workflow assets into current folder")
     console.print("  qatool workflow update     Update installed QA workflow assets")
     console.print("  qatool workflow uninstall  Remove installed QA workflow assets")
@@ -54,6 +55,7 @@ def print_usage(show_header: bool = True) -> None:
     console.print("  qatool wiki init")
     console.print("  qatool wiki init --name research-notes --agent roocode --yes")
     console.print("  qatool wiki init --name research-notes --agent claude --yes")
+    console.print("  qatool wiki update --yes")
     console.print("  qatool workflow install")
     console.print("  qatool workflow install --workflow scenario-test-design --agent roocode --yes")
     console.print("  qatool workflow install --workflow scenario-test-design --agent claude --yes")
@@ -101,7 +103,15 @@ def print_uninstall_plan(plan: list[UninstallPlanItem]) -> None:
 
 def print_wiki_init_plan(plan: list[WikiInitItem], overwrite: bool, overwrite_targets: set | None = None) -> None:
     overwrite_targets = overwrite_targets or set()
-    table = Table(title="Wiki init plan")
+    _print_wiki_plan("Wiki init plan", plan, overwrite, overwrite_targets)
+
+
+def print_wiki_update_plan(plan: list[WikiInitItem]) -> None:
+    _print_wiki_plan("Wiki update plan", plan, overwrite=True, overwrite_targets=set())
+
+
+def _print_wiki_plan(title: str, plan: list[WikiInitItem], overwrite: bool, overwrite_targets: set) -> None:
+    table = Table(title=title)
     table.add_column("Kind")
     table.add_column("Target")
     table.add_column("Exists")

@@ -6,7 +6,16 @@ from typing import Optional
 import typer
 
 from .agents import get_agent_spec
-from .console import console, print_header, print_plan, print_uninstall_plan, print_usage, print_wiki_init_plan, print_workflow_list
+from .console import (
+    console,
+    print_header,
+    print_plan,
+    print_uninstall_plan,
+    print_usage,
+    print_wiki_init_plan,
+    print_wiki_update_plan,
+    print_workflow_list,
+)
 from .installer import (
     apply_default_actions,
     asset_matches_path,
@@ -27,7 +36,16 @@ from .state import (
     record_repository_config,
     remove_installed_workflows,
 )
-from .wiki import SUPPORTED_WIKI_AGENTS, build_wiki_init_items, init_wiki_from_items
+from .wiki import (
+    SUPPORTED_WIKI_AGENTS,
+    WIKI_OPERATIONS,
+    build_wiki_init_items,
+    build_wiki_update_items,
+    init_wiki_from_items,
+    is_wiki_initialized,
+    resolve_existing_wiki_name,
+    wiki_item_matches_target,
+)
 
 app = typer.Typer(invoke_without_command=True, no_args_is_help=False, add_completion=False)
 workflow_app = typer.Typer(help="Manage QA workflow assets.", no_args_is_help=True, add_completion=False)
@@ -52,6 +70,20 @@ def init_wiki(
 ) -> None:
     """Initialize an LLM wiki in a project."""
     _run_wiki_init(name=name, agent=agent, target=target, yes=yes, show_header=True)
+
+
+@wiki_app.command("update")
+def update_wiki(
+    target: Path = typer.Option(Path.cwd(), "--target", "-t", help="Target wiki directory."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Apply updates without prompting."),
+    agents_md: Optional[bool] = typer.Option(
+        None,
+        "--agents-md/--no-agents-md",
+        help="Update AGENTS.md. If omitted, update it when this target was initialized as a wiki.",
+    ),
+) -> None:
+    """Update installed LLM wiki assets in a project."""
+    _run_wiki_update(target=target, yes=yes, agents_md=agents_md, show_header=True)
 
 
 def _run_wiki_init(
@@ -89,6 +121,47 @@ def _run_wiki_init(
     console.print("/ingest raw/<file>.md")
     console.print("/query <質問>")
     console.print("/lint")
+
+
+def _run_wiki_update(
+    target: Path,
+    yes: bool,
+    agents_md: Optional[bool],
+    show_header: bool,
+) -> None:
+    if show_header:
+        print_header()
+    resolved_target = target.resolve()
+    repository_config = load_repository_config(resolved_target)
+    if not _has_installed_wiki(resolved_target, repository_config):
+        console.print("[yellow]No initialized wiki assets were found.[/yellow]")
+        raise typer.Exit(1)
+
+    selected_agent = _resolve_wiki_update_agent(yes, resolved_target, repository_config)
+    wiki_name = resolve_existing_wiki_name(resolved_target)
+    include_agents_md = agents_md if agents_md is not None else _should_update_wiki_agents_md(repository_config)
+    plan = build_wiki_update_items(resolved_target, wiki_name, selected_agent)
+    if not include_agents_md:
+        plan = [item for item in plan if item.kind != "agents_md"]
+    plan = [item for item in plan if not wiki_item_matches_target(item)]
+
+    if not plan:
+        console.print("[green]No updates available.[/green]")
+        return
+    print_wiki_update_plan(plan)
+    if not yes and not _questionary().confirm("Update these wiki files?", default=True).ask():
+        raise typer.Exit(1)
+
+    result = init_wiki_from_items(plan, overwrite=True)
+    record_repository_config(
+        resolved_target,
+        selected_agent,
+        include_agents_md=False,
+        agents_md_kind=AGENTS_MD_KIND_WIKI if include_agents_md else (repository_config.agents_md_kind if repository_config else None),
+    )
+    console.print(f"\n[green]Updated {len(result.created) + len(result.overwritten)} item(s).[/green]")
+    if result.skipped:
+        console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
 
 
 @workflow_app.command("list")
@@ -365,6 +438,7 @@ def _interactive_wiki_menu(questionary) -> None:
         "Select wiki operation",
         choices=[
             questionary.Choice("init - 現在のフォルダに LLM wiki assets を初期化", value="init"),
+            questionary.Choice("update - 初期化済みの LLM wiki assets を最新版に更新", value="update"),
             questionary.Choice("help - wiki コマンドのヘルプを表示", value="help"),
         ],
     ).ask()
@@ -373,6 +447,8 @@ def _interactive_wiki_menu(questionary) -> None:
 
     if selected_operation == "init":
         _run_wiki_init(name=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
+    elif selected_operation == "update":
+        _run_wiki_update(target=Path.cwd(), yes=False, agents_md=None, show_header=False)
     else:
         print_usage(show_header=False)
 
@@ -394,6 +470,30 @@ def _resolve_wiki_agent(yes: bool, repository_config: RepositoryConfig | None = 
     if yes:
         return default_agent
     return _select_agent(SUPPORTED_WIKI_AGENTS, default_agent)
+
+
+def _resolve_wiki_update_agent(yes: bool, target: Path, repository_config: RepositoryConfig | None = None) -> str:
+    if repository_config is not None and repository_config.agent in SUPPORTED_WIKI_AGENTS:
+        return repository_config.agent
+
+    detected_agents = [
+        agent
+        for agent in SUPPORTED_WIKI_AGENTS
+        if any((target / get_agent_spec(agent).command_target_dir / f"{operation}.md").is_file() for operation in WIKI_OPERATIONS)
+    ]
+    if len(detected_agents) == 1:
+        return detected_agents[0]
+    return _resolve_wiki_agent(yes, repository_config)
+
+
+def _should_update_wiki_agents_md(repository_config: RepositoryConfig | None) -> bool:
+    if repository_config is None:
+        return True
+    return repository_config.agents_md_kind == AGENTS_MD_KIND_WIKI
+
+
+def _has_installed_wiki(target: Path, repository_config: RepositoryConfig | None) -> bool:
+    return (repository_config is not None and repository_config.agents_md_kind == AGENTS_MD_KIND_WIKI) or is_wiki_initialized(target)
 
 
 def _resolve_wiki_init_overwrites(plan: list, yes: bool) -> set[Path]:

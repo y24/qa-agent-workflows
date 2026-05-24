@@ -207,6 +207,89 @@ def test_wiki_init_uses_target_folder_name_by_default_with_yes() -> None:
         shutil.rmtree(target, ignore_errors=True)
 
 
+def test_wiki_update_overwrites_generated_wiki_assets_only() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-update-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        init_result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--name",
+                "Research Wiki",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        command_path = target / ".roo" / "commands" / "ingest.md"
+        index_path = target / "index.md"
+        log_path = target / "log.md"
+        command_path.write_text("modified command", encoding="utf-8")
+        index_path.write_text("user index", encoding="utf-8")
+        log_path.write_text("user log", encoding="utf-8")
+
+        update_result = CliRunner().invoke(app, ["wiki", "update", "--target", str(target), "--yes"])
+
+        assert init_result.exit_code == 0
+        assert update_result.exit_code == 0
+        assert "Updated 1 item(s)." in update_result.output
+        assert "modified command" not in command_path.read_text(encoding="utf-8")
+        assert index_path.read_text(encoding="utf-8") == "user index"
+        assert log_path.read_text(encoding="utf-8") == "user log"
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_wiki_update_reuses_recorded_claude_agent() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-update-claude-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        init_result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--name",
+                "Claude Wiki",
+                "--agent",
+                "claude",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        command_path = target / ".claude" / "commands" / "query.md"
+        command_path.write_text("modified command", encoding="utf-8")
+
+        update_result = CliRunner().invoke(app, ["wiki", "update", "--target", str(target), "--yes"])
+
+        assert init_result.exit_code == 0
+        assert update_result.exit_code == 0
+        assert "Updated 1 item(s)." in update_result.output
+        assert "modified command" not in command_path.read_text(encoding="utf-8")
+        assert not (target / ".roo" / "commands" / "query.md").exists()
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_wiki_update_reports_no_updates_for_matching_assets() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-update-none-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        init_result = CliRunner().invoke(app, ["wiki", "init", "--target", str(target), "--yes"])
+        update_result = CliRunner().invoke(app, ["wiki", "update", "--target", str(target), "--yes"])
+
+        assert init_result.exit_code == 0
+        assert update_result.exit_code == 0
+        assert "No updates available." in update_result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
 def test_workflow_install_reuses_agent_recorded_by_wiki_init(monkeypatch: pytest.MonkeyPatch) -> None:
     target = Path("work") / "test-tmp" / f"qatool-wiki-agent-reuse-{uuid.uuid4().hex}"
     target.mkdir(parents=True)

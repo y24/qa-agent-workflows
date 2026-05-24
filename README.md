@@ -42,6 +42,7 @@ qatool
 
 ```bash
 qatool wiki init
+qatool wiki update
 qatool workflow list
 qatool workflow install
 qatool workflow update
@@ -52,6 +53,7 @@ qatool workflow uninstall
 
 ```bash
 qatool wiki init --name research-notes --agent roocode --yes
+qatool wiki update --yes
 qatool workflow install --workflow scenario-test-design --agent roocode --yes
 qatool workflow install --workflow scenario-test-design --agent claude --yes
 qatool workflow install --workflow all --agent roocode --yes
@@ -63,11 +65,11 @@ qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
 
 | オプション | 対象 | 説明 |
 | --- | --- | --- |
-| `--target`, `-t` | `wiki init`, `workflow install/update/uninstall` | 配置先プロジェクトのディレクトリ。省略時はカレントディレクトリ。 |
+| `--target`, `-t` | `wiki init/update`, `workflow install/update/uninstall` | 配置先プロジェクトのディレクトリ。省略時はカレントディレクトリ。 |
 | `--agent`, `-a` | `wiki init`, `workflow install/uninstall` | commandの配置先agent。`roocode` または `claude`。 |
-| `--yes`, `-y` | `wiki init`, `workflow install/update/uninstall` | 確認プロンプトを省略して実行します。install/updateでは既存の生成物を上書きします。 |
+| `--yes`, `-y` | `wiki init/update`, `workflow install/update/uninstall` | 確認プロンプトを省略して実行します。install/updateでは既存の生成物を上書きします。 |
 | `--workflow`, `-w` | `workflow install/update/uninstall` | 対象workflow ID。`all` を指定すると対象workflowをまとめて扱います。 |
-| `--agents-md` / `--no-agents-md` | `workflow install/update` | `AGENTS.md` を作成・更新対象に含めるかを指定します。 |
+| `--agents-md` / `--no-agents-md` | `wiki update`, `workflow install/update` | `AGENTS.md` を作成・更新対象に含めるかを指定します。 |
 
 ---
 
@@ -138,8 +140,7 @@ qatool workflow uninstall
 
 ## Wiki Commands
 
-`wiki` コマンドは、LLMが継続的に保守するMarkdown wikiの初期構成を作るためのコマンド群です。
-現時点では `init` を提供しています。
+`wiki` コマンドは、LLMが継続的に保守するMarkdown wikiの初期構成を作ったり、配布済みのwiki用agent assetsを更新するためのコマンド群です。
 
 ### wikiの新規構築
 
@@ -167,6 +168,15 @@ target-project/
    ├─ query.md
    ├─ lint.md
    └─ convert.md
+```
+
+### wiki assetsの更新
+
+初期化済みwikiの `AGENTS.md` とスラッシュコマンドを、現在の package assets の内容で更新します。
+`wiki/`、`raw/`、`index.md`、`log.md` はwikiの運用データとして扱い、`wiki update` では上書きしません。
+
+```bash
+qatool wiki update
 ```
 
 ### wiki構築後の使い方
