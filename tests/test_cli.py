@@ -11,6 +11,17 @@ from qa_workflow_toolkit.console import _gradient_color
 from qa_workflow_toolkit.installer import apply_default_actions, build_install_plan, install_from_plan
 from qa_workflow_toolkit.models import CollisionAction
 from qa_workflow_toolkit.registry import get_workflow
+from qa_workflow_toolkit.state import AGENTS_MD_KIND_WIKI, record_installed_workflows, record_repository_config
+
+
+@pytest.fixture()
+def workspace_tmp() -> Path:
+    path = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
+    path.mkdir(parents=True)
+    try:
+        yield path
+    finally:
+        shutil.rmtree(path, ignore_errors=True)
 
 
 def test_header_gradient_uses_logo_colors() -> None:
@@ -75,7 +86,60 @@ def test_no_args_opens_interactive_menu_and_can_show_help(monkeypatch: pytest.Mo
     assert "Usage" in result.output
 
 
-def test_interactive_workflow_list_shows_operation_menu(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_interactive_workflow_list_hides_update_and_uninstall_without_installed_state(
+    monkeypatch: pytest.MonkeyPatch,
+    workspace_tmp: Path,
+) -> None:
+    workspace = workspace_tmp.resolve()
+    monkeypatch.chdir(workspace)
+    responses = ["workflow", "list"]
+    prompts: list[str] = []
+    choice_titles: list[list[str]] = []
+
+    class FakeChoice:
+        def __init__(self, title: str, value: str) -> None:
+            self.title = title
+            self.value = value
+
+    class SelectPrompt:
+        def __init__(self, message: str, choices: list[FakeChoice]) -> None:
+            self.message = message
+            self.choices = choices
+
+        def ask(self) -> str:
+            prompts.append(self.message)
+            choice_titles.append([choice.title for choice in self.choices])
+            return responses.pop(0)
+
+    class FakeQuestionary:
+        Choice = FakeChoice
+
+        @staticmethod
+        def select(message: str, choices: list[FakeChoice], default: str | None = None) -> SelectPrompt:
+            return SelectPrompt(message, choices)
+
+    monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+    result = CliRunner().invoke(app, [])
+
+    assert result.exit_code == 0
+    assert prompts == ["Select command", "Select workflow operation"]
+    assert choice_titles[1] == [
+        "install - QA workflow skills をカレントディレクトリへ配置",
+        "list - 利用可能な workflow 一覧を表示",
+        "help - workflow コマンドのヘルプを表示",
+    ]
+    assert "Available workflows" in result.output
+    assert "scenario-test-design - シナリオテスト設計" in result.output
+
+
+def test_interactive_workflow_list_shows_update_and_uninstall_with_installed_state(
+    monkeypatch: pytest.MonkeyPatch,
+    workspace_tmp: Path,
+) -> None:
+    workspace = workspace_tmp.resolve()
+    monkeypatch.chdir(workspace)
+    record_installed_workflows(workspace, [get_workflow("scenario-test-design")], "roocode", include_agents_md=False)
     responses = ["workflow", "list"]
     prompts: list[str] = []
     choice_titles: list[list[str]] = []
@@ -117,6 +181,88 @@ def test_interactive_workflow_list_shows_operation_menu(monkeypatch: pytest.Monk
     ]
     assert "Available workflows" in result.output
     assert "scenario-test-design - シナリオテスト設計" in result.output
+
+
+def test_interactive_wiki_menu_hides_update_without_installed_state(
+    monkeypatch: pytest.MonkeyPatch,
+    workspace_tmp: Path,
+) -> None:
+    workspace = workspace_tmp.resolve()
+    monkeypatch.chdir(workspace)
+    responses = ["wiki", "help"]
+    choice_titles: list[list[str]] = []
+
+    class FakeChoice:
+        def __init__(self, title: str, value: str) -> None:
+            self.title = title
+            self.value = value
+
+    class SelectPrompt:
+        def __init__(self, message: str, choices: list[FakeChoice]) -> None:
+            self.choices = choices
+
+        def ask(self) -> str:
+            choice_titles.append([choice.title for choice in self.choices])
+            return responses.pop(0)
+
+    class FakeQuestionary:
+        Choice = FakeChoice
+
+        @staticmethod
+        def select(message: str, choices: list[FakeChoice], default: str | None = None) -> SelectPrompt:
+            return SelectPrompt(message, choices)
+
+    monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+    result = CliRunner().invoke(app, [])
+
+    assert result.exit_code == 0
+    assert choice_titles[1] == [
+        "init - 現在のフォルダに LLM wiki assets を初期化",
+        "help - wiki コマンドのヘルプを表示",
+    ]
+
+
+def test_interactive_wiki_menu_shows_update_with_installed_state(
+    monkeypatch: pytest.MonkeyPatch,
+    workspace_tmp: Path,
+) -> None:
+    workspace = workspace_tmp.resolve()
+    monkeypatch.chdir(workspace)
+    record_repository_config(workspace, "roocode", include_agents_md=False, agents_md_kind=AGENTS_MD_KIND_WIKI)
+    responses = ["wiki", "help"]
+    choice_titles: list[list[str]] = []
+
+    class FakeChoice:
+        def __init__(self, title: str, value: str) -> None:
+            self.title = title
+            self.value = value
+
+    class SelectPrompt:
+        def __init__(self, message: str, choices: list[FakeChoice]) -> None:
+            self.choices = choices
+
+        def ask(self) -> str:
+            choice_titles.append([choice.title for choice in self.choices])
+            return responses.pop(0)
+
+    class FakeQuestionary:
+        Choice = FakeChoice
+
+        @staticmethod
+        def select(message: str, choices: list[FakeChoice], default: str | None = None) -> SelectPrompt:
+            return SelectPrompt(message, choices)
+
+    monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+    result = CliRunner().invoke(app, [])
+
+    assert result.exit_code == 0
+    assert choice_titles[1] == [
+        "init - 現在のフォルダに LLM wiki assets を初期化",
+        "update - 初期化済みの LLM wiki assets を最新版に更新",
+        "help - wiki コマンドのヘルプを表示",
+    ]
 
 
 def test_install_outputs_example_prompt() -> None:

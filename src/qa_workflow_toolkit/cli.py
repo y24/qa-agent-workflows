@@ -408,15 +408,26 @@ def _interactive_menu() -> None:
 
 
 def _interactive_workflow_menu(questionary) -> None:
-    selected_operation = questionary.select(
-        "Select workflow operation",
-        choices=[
-            questionary.Choice("install - QA workflow skills をカレントディレクトリへ配置", value="install"),
-            questionary.Choice("update - インストール済みの workflow skills を最新版に更新", value="update"),
-            questionary.Choice("uninstall - インストール済みの workflow skills を削除", value="uninstall"),
+    has_installed_workflows = _has_installed_workflow_assets(Path.cwd().resolve())
+    choices = [
+        questionary.Choice("install - QA workflow skills をカレントディレクトリへ配置", value="install"),
+    ]
+    if has_installed_workflows:
+        choices.extend(
+            [
+                questionary.Choice("update - インストール済みの workflow skills を最新版に更新", value="update"),
+                questionary.Choice("uninstall - インストール済みの workflow skills を削除", value="uninstall"),
+            ]
+        )
+    choices.extend(
+        [
             questionary.Choice("list - 利用可能な workflow 一覧を表示", value="list"),
             questionary.Choice("help - workflow コマンドのヘルプを表示", value="help"),
-        ],
+        ]
+    )
+    selected_operation = questionary.select(
+        "Select workflow operation",
+        choices=choices,
     ).ask()
     if not selected_operation:
         raise typer.Exit(1)
@@ -434,13 +445,16 @@ def _interactive_workflow_menu(questionary) -> None:
 
 
 def _interactive_wiki_menu(questionary) -> None:
+    has_installed_wiki = _has_installed_wiki(Path.cwd().resolve(), load_repository_config(Path.cwd().resolve()))
+    choices = [
+        questionary.Choice("init - 現在のフォルダに LLM wiki assets を初期化", value="init"),
+    ]
+    if has_installed_wiki:
+        choices.append(questionary.Choice("update - 初期化済みの LLM wiki assets を最新版に更新", value="update"))
+    choices.append(questionary.Choice("help - wiki コマンドのヘルプを表示", value="help"))
     selected_operation = questionary.select(
         "Select wiki operation",
-        choices=[
-            questionary.Choice("init - 現在のフォルダに LLM wiki assets を初期化", value="init"),
-            questionary.Choice("update - 初期化済みの LLM wiki assets を最新版に更新", value="update"),
-            questionary.Choice("help - wiki コマンドのヘルプを表示", value="help"),
-        ],
+        choices=choices,
     ).ask()
     if not selected_operation:
         raise typer.Exit(1)
@@ -497,6 +511,10 @@ def _should_update_wiki_agents_md(repository_config: RepositoryConfig | None) ->
 
 def _has_installed_wiki(target: Path, repository_config: RepositoryConfig | None) -> bool:
     return (repository_config is not None and repository_config.agents_md_kind == AGENTS_MD_KIND_WIKI) or is_wiki_initialized(target)
+
+
+def _has_installed_workflow_assets(target: Path) -> bool:
+    return bool(load_installed_workflows(target)) or bool(_installed_workflows(load_workflows(), target))
 
 
 def _resolve_wiki_init_overwrites(plan: list, yes: bool) -> set[Path]:
