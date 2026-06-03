@@ -135,6 +135,7 @@ qatool workflow uninstall
 ```text
 /scenario-test-design docsフォルダの資料を参照してシナリオテストを設計して
 /risk-based-test-design 要件定義書と不具合傾向をもとにリスクベーステスト方針を作って
+/pr-change-analysis https://dev.azure.com/org/proj/_git/repo/pullrequest/123 の変更からテスト観点を洗い出して
 ```
 
 ---

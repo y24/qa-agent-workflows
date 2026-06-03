@@ -1,0 +1,17 @@
+{
+  "id": "pr-change-analysis",
+  "display_name": "PR変更分析",
+  "description": "Azure DevOpsのPull Requestの差分・Description・レビューコメントから、変更内容をQA向けに整理した差分レポートと、リスク・テスト観点（特に非機能）を提案する分析レポートを作る",
+  "version": "0.1.0",
+  "sort_order": 900,
+  "skill_name": "pr-change-analysis",
+  "command_name": "pr-change-analysis",
+  "default_agent": "roocode",
+  "install": {
+    "agents_md": true,
+    "shared": {"source": "shared", "target": ".agents/shared"},
+    "skill": {"source": "workflows/pr-change-analysis/skill", "target": ".agents/skills/pr-change-analysis"},
+    "command": {"source": "commands/pr-change-analysis.md", "target": ".roo/commands/pr-change-analysis.md"}
+  },
+  "post_install_message": "/pr-change-analysis <Azure DevOps Pull RequestのURL（複数可）>"
+}
