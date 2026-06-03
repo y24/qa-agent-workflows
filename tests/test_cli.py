@@ -169,10 +169,13 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         )
 
         assert result.exit_code == 0
-        assert "Created 13 item(s)." in result.output
+        assert "Created 19 item(s)." in result.output
         assert (target / "AGENTS.md").is_file()
         assert (target / "raw" / ".gitkeep").is_file()
         assert (target / "wiki" / ".gitkeep").is_file()
+        assert (target / "wiki" / "articles" / ".gitkeep").is_file()
+        assert (target / "wiki" / "concepts" / ".gitkeep").is_file()
+        assert (target / "wiki" / "queries" / ".gitkeep").is_file()
         assert (target / ".temp" / ".gitkeep").is_file()
         assert (target / "index.md").is_file()
         assert (target / "log.md").is_file()
