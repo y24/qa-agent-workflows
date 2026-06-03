@@ -8,7 +8,6 @@
   "command_name": "scenario-test-design",
   "default_agent": "roocode",
   "install": {
-    "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/scenario-test-design/skill", "target": ".agents/skills/scenario-test-design"},
     "command": {"source": "commands/scenario-test-design.md", "target": ".roo/commands/scenario-test-design.md"}

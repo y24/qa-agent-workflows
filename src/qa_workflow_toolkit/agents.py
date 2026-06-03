@@ -11,7 +11,6 @@ class AgentSpec:
     id: str
     command_target_dir: str
     command_filename_suffix: str = ".md"
-    agents_md_source: str = "agents/roocode/AGENTS.md"
 
     def command_filename(self, command_name: str) -> str:
         return f"{command_name}{self.command_filename_suffix}"

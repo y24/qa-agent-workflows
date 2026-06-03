@@ -10,7 +10,7 @@
 
 QA業務向けAI agent workflow assetsを、カレントディレクトリへ配置するインストーラCLIです。
 
-`qatool` 自身はワークフローを実行しません。RooCodeやClaudeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/`、agent別のcommandsをカレントディレクトリに配置します。
+`qatool` 自身はワークフローを実行しません。RooCodeやClaudeなどのAIコーディングエージェントが参照する `.agents/shared/`、`.agents/skills/`、agent別のcommandsをカレントディレクトリに配置します。wiki構築時は `AGENTS.md` も配置します。
 
 ---
 
@@ -68,7 +68,7 @@ qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
 | `--agent`, `-a` | `wiki init`, `workflow install/uninstall` | commandの配置先agent。`roocode`、`claude`、`copilot`、`codex`。 |
 | `--yes`, `-y` | `wiki init/update`, `workflow install/update/uninstall` | 確認プロンプトを省略して実行します。install/updateでは既存の生成物を上書きします。 |
 | `--workflow`, `-w` | `workflow install/update/uninstall` | 対象workflow ID。`all` を指定すると対象workflowをまとめて扱います。 |
-| `--agents-md` / `--no-agents-md` | `wiki update`, `workflow install/update` | `AGENTS.md` を作成・更新対象に含めるかを指定します。 |
+| `--agents-md` / `--no-agents-md` | `wiki update` | `AGENTS.md` を更新対象に含めるかを指定します。 |
 
 ---
 
@@ -99,7 +99,6 @@ qatool workflow install
 
 | 配置先 | 役割 |
 | --- | --- |
-| `AGENTS.md` | 対象プロジェクトでagentが最初に読む共通指示。`--no-agents-md` で作成を省略できます。 |
 | `.agents/shared/` | workflow横断で使う共通ルール、根拠・曖昧性・トレーサビリティなどのポリシー。 |
 | `.agents/skills/<workflow>/` | workflow固有の `SKILL.md`、手順、判断基準、テンプレート。 |
 | `.roo/commands/<workflow>.md` | RooCode用のスラッシュコマンド。 |
@@ -108,8 +107,8 @@ qatool workflow install
 | `.codex/prompts/<workflow>.md` | Codex custom prompt用のMarkdown。 |
 | `.qatool/metadata.json` | インストール済みworkflowとリポジトリ単位の設定を記録する状態ファイル。 |
 
-対話実行では、対象 workflow、agent、`AGENTS.md` 作成有無、既存ファイルがある場合の扱いを選択できます。
-既存ファイルがある場合、通常は上書き、スキップ、`AGENTS.md` の別名作成を選べます。
+対話実行では、対象 workflow、agent、既存ファイルがある場合の扱いを選択できます。
+既存ファイルがある場合、通常は上書きまたはスキップを選べます。
 
 ### ワークフローの更新
 

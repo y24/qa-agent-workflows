@@ -18,7 +18,6 @@ from .console import (
 )
 from .installer import (
     apply_default_actions,
-    asset_matches_path,
     build_install_plan,
     build_uninstall_plan,
     install_from_plan,
@@ -182,14 +181,9 @@ def install(
     agent: Optional[str] = typer.Option(None, "--agent", "-a", help="Target agent."),
     target: Path = typer.Option(Path.cwd(), "--target", "-t", help="Target project directory."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Overwrite existing files without prompting."),
-    agents_md: Optional[bool] = typer.Option(
-        None,
-        "--agents-md/--no-agents-md",
-        help="Create AGENTS.md. If omitted in interactive mode, ask before installing.",
-    ),
 ) -> None:
     """Install QA workflow assets into a project."""
-    _run_workflow_install(workflow=workflow, agent=agent, target=target, yes=yes, agents_md=agents_md, show_header=True)
+    _run_workflow_install(workflow=workflow, agent=agent, target=target, yes=yes, show_header=True)
 
 
 def _run_workflow_install(
@@ -197,7 +191,6 @@ def _run_workflow_install(
     agent: Optional[str],
     target: Path,
     yes: bool,
-    agents_md: Optional[bool],
     show_header: bool,
 ) -> None:
     if show_header:
@@ -217,17 +210,11 @@ def _run_workflow_install(
         default_agent,
         repository_config,
     )
-    include_agents_md = _resolve_agents_md_choice(agents_md, yes, resolved_target, selected_agent, installed_metadata, selected_workflows)
 
     plan = _dedupe_plan(
         item
         for selected_workflow in selected_workflows
-        for item in build_install_plan(
-            selected_workflow,
-            resolved_target,
-            selected_agent,
-            include_agents_md=include_agents_md,
-        )
+        for item in build_install_plan(selected_workflow, resolved_target, selected_agent)
     )
     if yes:
         plan = apply_default_actions(plan, CollisionAction.OVERWRITE)
@@ -239,7 +226,7 @@ def _run_workflow_install(
         raise typer.Exit(1)
 
     result = install_from_plan(plan)
-    record_installed_workflows(resolved_target, selected_workflows, selected_agent, include_agents_md)
+    record_installed_workflows(resolved_target, selected_workflows, selected_agent)
     console.print(f"\n[green]Installed {len(result.copied)} item(s).[/green]")
     if result.skipped:
         console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
@@ -257,21 +244,15 @@ def update(
     workflow: Optional[str] = typer.Option(None, "--workflow", "-w", help="Installed workflow ID to update, or 'all'."),
     target: Path = typer.Option(Path.cwd(), "--target", "-t", help="Target project directory."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Apply updates without prompting."),
-    agents_md: Optional[bool] = typer.Option(
-        None,
-        "--agents-md/--no-agents-md",
-        help="Update AGENTS.md. If omitted in interactive mode, ask before updating.",
-    ),
 ) -> None:
     """Update installed QA workflow assets in a project."""
-    _run_workflow_update(workflow=workflow, target=target, yes=yes, agents_md=agents_md, show_header=True)
+    _run_workflow_update(workflow=workflow, target=target, yes=yes, show_header=True)
 
 
 def _run_workflow_update(
     workflow: Optional[str],
     target: Path,
     yes: bool,
-    agents_md: Optional[bool],
     show_header: bool,
 ) -> None:
     if show_header:
@@ -293,12 +274,7 @@ def _run_workflow_update(
         item
         for metadata in selected_metadata
         for selected_workflow in [get_workflow(metadata.workflow_id)]
-        for item in build_install_plan(
-            selected_workflow,
-            resolved_target,
-            metadata.agent,
-            include_agents_md=metadata.include_agents_md if agents_md is None else agents_md,
-        )
+        for item in build_install_plan(selected_workflow, resolved_target, metadata.agent)
     )
     plan = apply_default_actions(plan, CollisionAction.OVERWRITE)
     plan = [item for item in plan if item.action != CollisionAction.NO_CHANGE]
@@ -316,7 +292,6 @@ def _run_workflow_update(
             resolved_target,
             [get_workflow(metadata.workflow_id)],
             metadata.agent,
-            metadata.include_agents_md if agents_md is None else agents_md,
         )
     console.print(f"\n[green]Updated {len(result.copied)} item(s).[/green]")
     if result.skipped:
@@ -367,7 +342,6 @@ def _run_workflow_uninstall(
             resolved_target,
             agent or metadata.agent,
             include_shared=include_common_assets and index == 0,
-            include_agents_md=metadata.include_agents_md and include_common_assets and index == 0,
         )
     )
     print_uninstall_plan(plan)
@@ -433,9 +407,9 @@ def _interactive_workflow_menu(questionary) -> None:
         raise typer.Exit(1)
 
     if selected_operation == "install":
-        _run_workflow_install(workflow=None, agent=None, target=Path.cwd(), yes=False, agents_md=None, show_header=False)
+        _run_workflow_install(workflow=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "update":
-        _run_workflow_update(workflow=None, target=Path.cwd(), yes=False, agents_md=None, show_header=False)
+        _run_workflow_update(workflow=None, target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "uninstall":
         _run_workflow_uninstall(workflow=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "list":
@@ -577,34 +551,6 @@ def _resolve_agent_choice(
     return _select_agent(supported_agents, default_agent)
 
 
-def _resolve_agents_md_choice(
-    agents_md: Optional[bool],
-    yes: bool,
-    target: Path,
-    agent: str,
-    installed_metadata: dict[str, InstalledWorkflow] | None = None,
-    selected_workflows: list[WorkflowManifest] | None = None,
-) -> bool:
-    if agents_md is not None:
-        return agents_md
-    if installed_metadata is not None and selected_workflows is not None:
-        saved_include_agents_md = _saved_metadata_value(installed_metadata, selected_workflows, "include_agents_md")
-        if isinstance(saved_include_agents_md, bool):
-            return saved_include_agents_md
-    if yes:
-        return True
-    if asset_matches_path(get_agent_spec(agent).agents_md_source, target / "AGENTS.md"):
-        return True
-
-    selected = _questionary().confirm(
-        "Create AGENTS.md? Choose No if you want to keep the target repository's existing agent instructions unchanged.",
-        default=True,
-    ).ask()
-    if selected is None:
-        raise typer.Exit(1)
-    return bool(selected)
-
-
 def _saved_metadata_value(
     installed_metadata: dict[str, InstalledWorkflow],
     selected_workflows: list[WorkflowManifest],
@@ -632,23 +578,13 @@ def _resolve_collision(item: InstallPlanItem) -> InstallPlanItem:
     if not item.exists:
         return InstallPlanItem(item.kind, item.source, item.target, item.exists, item.is_dir, CollisionAction.OVERWRITE)
 
-    if item.kind == "agents_md":
-        action = questionary.select(
-            f"{item.target} already exists",
-            choices=[
-                questionary.Choice("Overwrite", CollisionAction.OVERWRITE),
-                questionary.Choice("Rename", CollisionAction.RENAME),
-                questionary.Choice("Skip", CollisionAction.SKIP),
-            ],
-        ).ask()
-    else:
-        action = questionary.select(
-            f"{item.target} already exists",
-            choices=[
-                questionary.Choice("Overwrite", CollisionAction.OVERWRITE),
-                questionary.Choice("Skip", CollisionAction.SKIP),
-            ],
-        ).ask()
+    action = questionary.select(
+        f"{item.target} already exists",
+        choices=[
+            questionary.Choice("Overwrite", CollisionAction.OVERWRITE),
+            questionary.Choice("Skip", CollisionAction.SKIP),
+        ],
+    ).ask()
 
     if not action:
         raise typer.Exit(1)
@@ -691,7 +627,7 @@ def _installed_workflow_metadata(workflows: list[WorkflowManifest], target: Path
         workflow.id: InstalledWorkflow(
             workflow_id=workflow.id,
             agent=workflow.default_agent,
-            include_agents_md=(target / "AGENTS.md").exists(),
+            include_agents_md=False,
             manifest_version=workflow.version,
             installed_at="",
             updated_at="",

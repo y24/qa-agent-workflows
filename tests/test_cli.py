@@ -6,10 +6,8 @@ import uuid
 import pytest
 from typer.testing import CliRunner
 
-from qa_workflow_toolkit.cli import _resolve_agents_md_choice, app
+from qa_workflow_toolkit.cli import app
 from qa_workflow_toolkit.console import _gradient_color
-from qa_workflow_toolkit.installer import apply_default_actions, build_install_plan, install_from_plan
-from qa_workflow_toolkit.models import CollisionAction
 from qa_workflow_toolkit.registry import get_workflow
 from qa_workflow_toolkit.state import AGENTS_MD_KIND_WIKI, record_installed_workflows, record_repository_config
 
@@ -139,7 +137,7 @@ def test_interactive_workflow_list_shows_update_and_uninstall_with_installed_sta
 ) -> None:
     workspace = workspace_tmp.resolve()
     monkeypatch.chdir(workspace)
-    record_installed_workflows(workspace, [get_workflow("scenario-test-design")], "roocode", include_agents_md=False)
+    record_installed_workflows(workspace, [get_workflow("scenario-test-design")], "roocode")
     responses = ["workflow", "list"]
     prompts: list[str] = []
     choice_titles: list[list[str]] = []
@@ -287,7 +285,7 @@ def test_install_outputs_example_prompt() -> None:
         assert result.exit_code == 0
         assert "create" in result.output
         assert "overwrite" not in result.output
-        assert "Installed 4 item(s)." in result.output
+        assert "Installed 3 item(s)." in result.output
         assert "Usage:" in result.output
         assert "/risk-based-test-design <入力資料>" in result.output
         assert "RooCodeで" not in result.output
@@ -471,7 +469,6 @@ def test_workflow_install_reuses_agent_recorded_by_wiki_init(monkeypatch: pytest
                 "scenario-test-design",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -516,7 +513,6 @@ def test_workflow_uninstall_keeps_wiki_agents_md_when_state_identifies_it_as_wik
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -597,7 +593,7 @@ def test_wiki_init_prompts_before_overwriting_existing_agents_md(monkeypatch: py
         shutil.rmtree(target, ignore_errors=True)
 
 
-def test_install_can_skip_agents_md() -> None:
+def test_install_does_not_create_agents_md() -> None:
     target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
     target.mkdir(parents=True)
     try:
@@ -612,7 +608,6 @@ def test_install_can_skip_agents_md() -> None:
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -642,7 +637,6 @@ def test_install_creates_copilot_prompt_file() -> None:
                 "copilot",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -668,7 +662,6 @@ def test_install_creates_codex_prompt_file() -> None:
                 "codex",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -694,7 +687,6 @@ def test_install_records_workflow_metadata() -> None:
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -711,7 +703,7 @@ def test_install_records_workflow_metadata() -> None:
         shutil.rmtree(target, ignore_errors=True)
 
 
-def test_install_reuses_recorded_agent_and_agents_md_choice(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_install_reuses_recorded_agent(monkeypatch: pytest.MonkeyPatch) -> None:
     target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
     target.mkdir(parents=True)
     try:
@@ -726,7 +718,6 @@ def test_install_reuses_recorded_agent_and_agents_md_choice(monkeypatch: pytest.
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -799,7 +790,7 @@ def test_install_outputs_no_change_for_matching_existing_assets() -> None:
         assert second_result.exit_code == 0
         assert "no change" in second_result.output
         assert "Installed 0 item(s)." in second_result.output
-        assert "Skipped 4 item(s)." in second_result.output
+        assert "Skipped 3 item(s)." in second_result.output
     finally:
         shutil.rmtree(target, ignore_errors=True)
 
@@ -893,7 +884,6 @@ def test_update_asks_once_without_per_file_collision_prompts(monkeypatch: pytest
                 "scenario-test-design",
                 "--target",
                 str(target),
-                "--agents-md",
             ],
         )
 
@@ -940,10 +930,9 @@ def test_uninstall_removes_workflow_specific_assets() -> None:
 
         assert install_result.exit_code == 0
         assert uninstall_result.exit_code == 0
-        assert "Removed 4 item(s)." in uninstall_result.output
+        assert "Removed 3 item(s)." in uninstall_result.output
         assert not (target / ".agents" / "skills" / "scenario-test-design").exists()
         assert not (target / ".roo" / "commands" / "scenario-test-design.md").exists()
-        assert not (target / "AGENTS.md").exists()
         assert not (target / ".agents" / "shared").exists()
         assert not (target / ".qatool" / "metadata.json").exists()
     finally:
@@ -990,7 +979,6 @@ def test_uninstall_without_workflow_prompts_for_installed_workflows_only(monkeyp
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -1005,7 +993,6 @@ def test_uninstall_without_workflow_prompts_for_installed_workflows_only(monkeyp
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -1090,7 +1077,7 @@ def test_uninstall_keeps_common_assets_when_other_workflows_remain() -> None:
         assert second_install.exit_code == 0
         assert uninstall_result.exit_code == 0
         assert "Removed 2 item(s)." in uninstall_result.output
-        assert (target / "AGENTS.md").is_file()
+        assert not (target / "AGENTS.md").exists()
         assert (target / ".agents" / "shared" / "common_contract.md").is_file()
         assert (target / ".qatool" / "metadata.json").is_file()
         assert (target / ".agents" / "skills" / "scenario-test-design" / "SKILL.md").is_file()
@@ -1165,7 +1152,6 @@ def test_uninstall_plan_hides_missing_targets() -> None:
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -1192,7 +1178,7 @@ def test_uninstall_plan_hides_missing_targets() -> None:
         shutil.rmtree(target, ignore_errors=True)
 
 
-def test_uninstall_plan_hides_agents_md_when_install_skipped_it() -> None:
+def test_uninstall_plan_does_not_manage_existing_agents_md() -> None:
     target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
     target.mkdir(parents=True)
     try:
@@ -1207,7 +1193,6 @@ def test_uninstall_plan_hides_agents_md_when_install_skipped_it() -> None:
                 "roocode",
                 "--target",
                 str(target),
-                "--no-agents-md",
                 "--yes",
             ],
         )
@@ -1235,20 +1220,3 @@ def test_uninstall_plan_hides_agents_md_when_install_skipped_it() -> None:
     finally:
         shutil.rmtree(target, ignore_errors=True)
 
-
-def test_agents_md_choice_skips_prompt_when_existing_file_matches(monkeypatch: pytest.MonkeyPatch) -> None:
-    target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
-    target.mkdir(parents=True)
-    try:
-        workflow = get_workflow("scenario-test-design")
-        plan = apply_default_actions(build_install_plan(workflow, target, "roocode"), CollisionAction.OVERWRITE)
-        install_from_plan(plan)
-
-        def fail_questionary():
-            raise AssertionError("questionary should not be called for matching AGENTS.md")
-
-        monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", fail_questionary)
-
-        assert _resolve_agents_md_choice(None, False, target, "roocode") is True
-    finally:
-        shutil.rmtree(target, ignore_errors=True)

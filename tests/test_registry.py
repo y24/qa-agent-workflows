@@ -63,7 +63,6 @@ def _workflow_from_dict(workflow_id: str, sort_order: int | None = None) -> Work
         "command_name": workflow_id,
         "default_agent": "roocode",
         "install": {
-            "agents_md": True,
             "shared": {"source": "shared", "target": ".agents/shared"},
             "skill": {"source": f"workflows/{workflow_id}/skill", "target": f".agents/skills/{workflow_id}"},
             "command": {"source": f"commands/{workflow_id}.md", "target": f".roo/commands/{workflow_id}.md"},

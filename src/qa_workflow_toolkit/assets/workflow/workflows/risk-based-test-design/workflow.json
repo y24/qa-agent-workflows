@@ -8,7 +8,6 @@
   "command_name": "risk-based-test-design",
   "default_agent": "roocode",
   "install": {
-    "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/risk-based-test-design/skill", "target": ".agents/skills/risk-based-test-design"},
     "command": {"source": "commands/risk-based-test-design.md", "target": ".roo/commands/risk-based-test-design.md"}

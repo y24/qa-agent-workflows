@@ -8,7 +8,6 @@
   "command_name": "nonfunctional-quality-criteria-planning",
   "default_agent": "roocode",
   "install": {
-    "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/nonfunctional-quality-criteria-planning/skill", "target": ".agents/skills/nonfunctional-quality-criteria-planning"},
     "command": {"source": "commands/nonfunctional-quality-criteria-planning.md", "target": ".roo/commands/nonfunctional-quality-criteria-planning.md"}

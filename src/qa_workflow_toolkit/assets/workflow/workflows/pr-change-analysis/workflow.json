@@ -8,7 +8,6 @@
   "command_name": "pr-change-analysis",
   "default_agent": "roocode",
   "install": {
-    "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/pr-change-analysis/skill", "target": ".agents/skills/pr-change-analysis"},
     "command": {"source": "commands/pr-change-analysis.md", "target": ".roo/commands/pr-change-analysis.md"}

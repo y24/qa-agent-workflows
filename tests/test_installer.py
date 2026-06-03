@@ -32,34 +32,33 @@ def test_build_install_plan_for_scenario_test_design(workspace_tmp: Path) -> Non
     workflow = get_workflow("scenario-test-design")
     plan = build_install_plan(workflow, workspace_tmp, "roocode")
 
-    assert [item.kind for item in plan] == ["agents_md", "shared", "skill", "command"]
-    assert plan[0].target == workspace_tmp / "AGENTS.md"
-    assert plan[2].target == workspace_tmp / ".agents" / "skills" / "scenario-test-design"
-    assert plan[3].target == workspace_tmp / ".roo" / "commands" / "scenario-test-design.md"
+    assert [item.kind for item in plan] == ["shared", "skill", "command"]
+    assert plan[1].target == workspace_tmp / ".agents" / "skills" / "scenario-test-design"
+    assert plan[2].target == workspace_tmp / ".roo" / "commands" / "scenario-test-design.md"
 
 
 def test_build_install_plan_uses_agent_specific_command_target(workspace_tmp: Path) -> None:
     workflow = get_workflow("scenario-test-design")
     plan = build_install_plan(workflow, workspace_tmp, "claude")
 
-    assert plan[3].source == "commands/scenario-test-design.md"
-    assert plan[3].target == workspace_tmp / ".claude" / "commands" / "scenario-test-design.md"
+    assert plan[2].source == "commands/scenario-test-design.md"
+    assert plan[2].target == workspace_tmp / ".claude" / "commands" / "scenario-test-design.md"
 
 
 def test_build_install_plan_uses_copilot_prompt_file_target(workspace_tmp: Path) -> None:
     workflow = get_workflow("scenario-test-design")
     plan = build_install_plan(workflow, workspace_tmp, "copilot")
 
-    assert plan[3].source == "commands/scenario-test-design.md"
-    assert plan[3].target == workspace_tmp / ".github" / "prompts" / "scenario-test-design.prompt.md"
+    assert plan[2].source == "commands/scenario-test-design.md"
+    assert plan[2].target == workspace_tmp / ".github" / "prompts" / "scenario-test-design.prompt.md"
 
 
 def test_build_install_plan_uses_codex_prompt_target(workspace_tmp: Path) -> None:
     workflow = get_workflow("scenario-test-design")
     plan = build_install_plan(workflow, workspace_tmp, "codex")
 
-    assert plan[3].source == "commands/scenario-test-design.md"
-    assert plan[3].target == workspace_tmp / ".codex" / "prompts" / "scenario-test-design.md"
+    assert plan[2].source == "commands/scenario-test-design.md"
+    assert plan[2].target == workspace_tmp / ".codex" / "prompts" / "scenario-test-design.md"
 
 
 def test_build_wiki_init_items_uses_agent_specific_command_target(workspace_tmp: Path) -> None:
@@ -85,9 +84,9 @@ def test_build_wiki_init_items_uses_codex_prompt_target(workspace_tmp: Path) -> 
     assert workspace_tmp / ".codex" / "prompts" / "ingest.md" in command_targets
 
 
-def test_build_install_plan_can_skip_agents_md(workspace_tmp: Path) -> None:
+def test_build_install_plan_does_not_include_agents_md(workspace_tmp: Path) -> None:
     workflow = get_workflow("scenario-test-design")
-    plan = build_install_plan(workflow, workspace_tmp, "roocode", include_agents_md=False)
+    plan = build_install_plan(workflow, workspace_tmp, "roocode")
 
     assert [item.kind for item in plan] == ["shared", "skill", "command"]
     assert all(item.target != workspace_tmp / "AGENTS.md" for item in plan)
@@ -100,8 +99,8 @@ def test_install_copies_assets(workspace_tmp: Path) -> None:
 
     result = install_from_plan(plan)
 
-    assert len(result.copied) == 4
-    assert (workspace_tmp / "AGENTS.md").is_file()
+    assert len(result.copied) == 3
+    assert not (workspace_tmp / "AGENTS.md").exists()
     assert (workspace_tmp / ".agents" / "shared" / "common_contract.md").is_file()
     assert (workspace_tmp / ".agents" / "skills" / "scenario-test-design" / "SKILL.md").is_file()
     assert (workspace_tmp / ".roo" / "commands" / "scenario-test-design.md").is_file()
@@ -126,7 +125,7 @@ def test_install_skips_no_change_items(workspace_tmp: Path) -> None:
     result = install_from_plan(plan)
 
     assert result.copied == ()
-    assert len(result.skipped) == 4
+    assert len(result.skipped) == 3
 
 
 def test_uninstall_removes_matching_workflow_assets(workspace_tmp: Path) -> None:
@@ -141,7 +140,7 @@ def test_uninstall_removes_matching_workflow_assets(workspace_tmp: Path) -> None
     assert not (workspace_tmp / ".agents" / "skills" / "scenario-test-design").exists()
     assert not (workspace_tmp / ".roo" / "commands" / "scenario-test-design.md").exists()
     assert (workspace_tmp / ".agents" / "shared" / "common_contract.md").is_file()
-    assert (workspace_tmp / "AGENTS.md").is_file()
+    assert not (workspace_tmp / "AGENTS.md").exists()
 
 
 def test_uninstall_skips_modified_assets(workspace_tmp: Path) -> None:
@@ -160,12 +159,9 @@ def test_uninstall_skips_modified_assets(workspace_tmp: Path) -> None:
 
 def test_uninstall_does_not_count_missing_assets_as_skipped(workspace_tmp: Path) -> None:
     workflow = get_workflow("scenario-test-design")
-    initial_plan = apply_default_actions(
-        build_install_plan(workflow, workspace_tmp, "roocode", include_agents_md=False),
-        CollisionAction.OVERWRITE,
-    )
+    initial_plan = apply_default_actions(build_install_plan(workflow, workspace_tmp, "roocode"), CollisionAction.OVERWRITE)
     install_from_plan(initial_plan)
-    plan = build_uninstall_plan(workflow, workspace_tmp, "roocode", include_agents_md=True)
+    plan = build_uninstall_plan(workflow, workspace_tmp, "roocode")
 
     result = uninstall_from_plan(plan)
 

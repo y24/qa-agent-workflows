@@ -8,7 +8,6 @@
   "command_name": "test-design-review",
   "default_agent": "roocode",
   "install": {
-    "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/test-design-review/skill", "target": ".agents/skills/test-design-review"},
     "command": {"source": "commands/test-design-review.md", "target": ".roo/commands/test-design-review.md"}

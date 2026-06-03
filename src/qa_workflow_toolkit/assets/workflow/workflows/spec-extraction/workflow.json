@@ -8,7 +8,6 @@
   "command_name": "spec-extraction",
   "default_agent": "roocode",
   "install": {
-    "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/spec-extraction/skill", "target": ".agents/skills/spec-extraction"},
     "command": {"source": "commands/spec-extraction.md", "target": ".roo/commands/spec-extraction.md"}

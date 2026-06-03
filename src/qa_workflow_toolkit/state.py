@@ -50,7 +50,7 @@ def load_repository_config(target: Path) -> RepositoryConfig | None:
         return None
     return RepositoryConfig(
         agent=str(data["agent"]),
-        include_agents_md=_state_has_workflow_agents_md(data),
+        include_agents_md=bool(data.get("include_agents_md", False)),
         agents_md_kind=_agents_md_kind(data),
     )
 
@@ -62,14 +62,13 @@ def load_installed_workflows(target: Path) -> dict[str, InstalledWorkflow]:
 
     workflows = data.get("workflows", [])
     agent = str(data.get("agent", DEFAULT_AGENT))
-    include_agents_md = _state_has_workflow_agents_md(data)
     installed: dict[str, InstalledWorkflow] = {}
     for item in workflows:
         workflow_id = str(item["workflow_id"])
         installed[workflow_id] = InstalledWorkflow(
             workflow_id=workflow_id,
             agent=agent,
-            include_agents_md=include_agents_md,
+            include_agents_md=False,
             manifest_version=str(item.get("manifest_version", "")),
             installed_at=str(item.get("installed_at", "")),
             updated_at=str(item.get("updated_at", "")),
@@ -92,7 +91,7 @@ def save_installed_workflows(target: Path, workflows: dict[str, InstalledWorkflo
 def record_repository_config(
     target: Path,
     agent: str,
-    include_agents_md: bool = True,
+    include_agents_md: bool = False,
     agents_md_kind: str | None = None,
 ) -> None:
     config = load_repository_config(target)
@@ -126,9 +125,9 @@ def _save_installed_workflows(
     include_agents_md = (
         include_agents_md
         if include_agents_md is not None
-        else _single_workflow_value(workflows, "include_agents_md", True)
+        else _single_workflow_value(workflows, "include_agents_md", False)
     )
-    agents_md_kind = agents_md_kind or (AGENTS_MD_KIND_WORKFLOW if include_agents_md else AGENTS_MD_KIND_NONE)
+    agents_md_kind = agents_md_kind or AGENTS_MD_KIND_NONE
     data: dict[str, Any] = {
         "schema_version": STATE_SCHEMA_VERSION,
         "agent": agent,
@@ -152,7 +151,6 @@ def record_installed_workflows(
     target: Path,
     workflows: list[WorkflowManifest],
     agent: str,
-    include_agents_md: bool,
 ) -> None:
     installed = load_installed_workflows(target)
     now = _now_iso()
@@ -161,22 +159,18 @@ def record_installed_workflows(
         installed[workflow.id] = InstalledWorkflow(
             workflow_id=workflow.id,
             agent=agent,
-            include_agents_md=include_agents_md,
+            include_agents_md=False,
             manifest_version=workflow.version,
             installed_at=existing.installed_at if existing else now,
             updated_at=now,
         )
     config = load_repository_config(target)
-    agents_md_kind = (
-        AGENTS_MD_KIND_WORKFLOW
-        if include_agents_md
-        else config.agents_md_kind if config else AGENTS_MD_KIND_NONE
-    )
+    agents_md_kind = config.agents_md_kind if config and config.agents_md_kind == AGENTS_MD_KIND_WIKI else AGENTS_MD_KIND_NONE
     _save_installed_workflows(
         target,
         installed,
         agent=agent,
-        include_agents_md=include_agents_md,
+        include_agents_md=False,
         agents_md_kind=agents_md_kind,
         keep_empty=True,
     )
@@ -217,10 +211,6 @@ def _agents_md_kind(data: dict[str, Any]) -> str:
     if kind in {AGENTS_MD_KIND_NONE, AGENTS_MD_KIND_WIKI, AGENTS_MD_KIND_WORKFLOW}:
         return kind
     return AGENTS_MD_KIND_NONE
-
-
-def _state_has_workflow_agents_md(data: dict[str, Any]) -> bool:
-    return _agents_md_kind(data) == AGENTS_MD_KIND_WORKFLOW
 
 
 def _single_workflow_value(workflows: dict[str, InstalledWorkflow], field_name: str, default: Any) -> Any:

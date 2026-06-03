@@ -8,7 +8,6 @@
   "command_name": "defect-analysis",
   "default_agent": "roocode",
   "install": {
-    "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
     "skill": {"source": "workflows/defect-analysis/skill", "target": ".agents/skills/defect-analysis"},
     "command": {"source": "commands/defect-analysis.md", "target": ".roo/commands/defect-analysis.md"}

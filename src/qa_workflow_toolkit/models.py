@@ -23,7 +23,6 @@ class InstallSourceTarget:
 
 @dataclass(frozen=True)
 class WorkflowInstallSpec:
-    agents_md: bool
     shared: InstallSourceTarget
     skill: InstallSourceTarget
     command: InstallSourceTarget
@@ -72,7 +71,6 @@ class WorkflowManifest:
             supported_agents=tuple(str(agent) for agent in data.get("supported_agents") or supported_agent_ids()),
             default_agent=str(data["default_agent"]),
             install=WorkflowInstallSpec(
-                agents_md=bool(install.get("agents_md", True)),
                 shared=InstallSourceTarget(**install["shared"]),
                 skill=InstallSourceTarget(**install["skill"]),
                 command=InstallSourceTarget(**install["command"]),
