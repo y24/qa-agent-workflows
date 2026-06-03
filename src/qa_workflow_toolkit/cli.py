@@ -479,7 +479,10 @@ def _resolve_wiki_update_agent(yes: bool, target: Path, repository_config: Repos
     detected_agents = [
         agent
         for agent in SUPPORTED_WIKI_AGENTS
-        if any((target / get_agent_spec(agent).command_target_dir / f"{operation}.md").is_file() for operation in WIKI_OPERATIONS)
+        if any(
+            (target / get_agent_spec(agent).command_target_dir / get_agent_spec(agent).command_filename(operation)).is_file()
+            for operation in WIKI_OPERATIONS
+        )
     ]
     if len(detected_agents) == 1:
         return detected_agents[0]

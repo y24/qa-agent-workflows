@@ -68,6 +68,8 @@
 - [ ] `qatool workflow list` で対象 workflow が表示される。
 - [ ] roocode install で `.roo/commands/<workflow>.md` に command が配置される。
 - [ ] claude install で `.claude/commands/<workflow>.md` に command が配置される。
+- [ ] copilot install で `.github/prompts/<workflow>.prompt.md` に prompt file が配置される。
+- [ ] codex install で `.codex/prompts/<workflow>.md` に custom prompt が配置される。
 - [ ] 2回目の install で一致 asset が `no change` になる。
 - [ ] `update` と `uninstall` の挙動を説明できる。
 - [ ] `pytest` が通る。

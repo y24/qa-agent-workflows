@@ -55,7 +55,7 @@ def build_wiki_init_items(target_dir: Path, wiki_name: str, agent: str) -> list[
         items.append(
             WikiInitItem(
                 "command",
-                target_dir / agent_spec.command_target_dir / f"{operation}.md",
+                target_dir / agent_spec.command_target_dir / agent_spec.command_filename(operation),
                 _template(f"wiki/commands/{operation}.md"),
             )
         )
@@ -74,7 +74,7 @@ def build_wiki_update_items(target_dir: Path, wiki_name: str, agent: str) -> lis
         items.append(
             WikiInitItem(
                 "command",
-                target_dir / agent_spec.command_target_dir / f"{operation}.md",
+                target_dir / agent_spec.command_target_dir / agent_spec.command_filename(operation),
                 _template(f"wiki/commands/{operation}.md"),
             )
         )
@@ -141,7 +141,10 @@ def is_wiki_initialized(target_dir: Path) -> bool:
         content = agents_md.read_text(encoding="utf-8")
         if "wiki-name:" in content or "LLM Wiki" in content:
             return True
-    if any((target_dir / get_agent_spec(agent).command_target_dir / "ingest.md").is_file() for agent in SUPPORTED_WIKI_AGENTS):
+    if any(
+        (target_dir / get_agent_spec(agent).command_target_dir / get_agent_spec(agent).command_filename("ingest")).is_file()
+        for agent in SUPPORTED_WIKI_AGENTS
+    ):
         return True
     return (target_dir / "wiki").is_dir() and (target_dir / "raw").is_dir()
 

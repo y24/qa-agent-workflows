@@ -40,6 +40,7 @@
 - [ ] `SKILL.md` から参照するファイルが存在する。
 - [ ] `workflow.json` の `install.shared.source`、`install.skill.source`、`install.command.source` が実在する。
 - [ ] `workflow.json` の install target が `.agents/shared`、`.agents/skills/<workflow>`、`.roo/commands/<workflow>.md` の既存形式に揃っている。
+- [ ] agent別のcommand配置先は `src/qa_workflow_toolkit/agents.py` で吸収し、Copilotは `.github/prompts/<workflow>.prompt.md`、Codexは `.codex/prompts/<workflow>.md` になることを確認した。
 - [ ] command asset から対象 skill への誘導が成立している。
 - [ ] 移動前後で主要な業務内容が欠落していない。
 - [ ] 同じルールの重複記載が増えていない。

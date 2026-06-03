@@ -31,7 +31,7 @@ def test_manifest_contains_install_targets() -> None:
 
     assert workflow.sort_order == 100
     assert workflow.default_agent == "roocode"
-    assert workflow.supported_agents == ("roocode", "claude")
+    assert workflow.supported_agents == ("roocode", "claude", "copilot", "codex")
     assert workflow.install.shared.target == ".agents/shared"
     assert workflow.install.skill.target == ".agents/skills/scenario-test-design"
     assert workflow.install.command.source == "commands/scenario-test-design.md"

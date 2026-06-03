@@ -99,7 +99,7 @@ def build_uninstall_plan(
 
 def _command_target(workflow: WorkflowManifest, target_dir: Path, agent: str) -> Path:
     agent_spec = get_agent_spec(agent)
-    return target_dir / agent_spec.command_target_dir / f"{workflow.command_name}.md"
+    return target_dir / agent_spec.command_target_dir / agent_spec.command_filename(workflow.command_name)
 
 
 def uninstall_from_plan(plan: list[UninstallPlanItem]) -> UninstallResult:

@@ -46,6 +46,22 @@ def test_build_install_plan_uses_agent_specific_command_target(workspace_tmp: Pa
     assert plan[3].target == workspace_tmp / ".claude" / "commands" / "scenario-test-design.md"
 
 
+def test_build_install_plan_uses_copilot_prompt_file_target(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    plan = build_install_plan(workflow, workspace_tmp, "copilot")
+
+    assert plan[3].source == "commands/scenario-test-design.md"
+    assert plan[3].target == workspace_tmp / ".github" / "prompts" / "scenario-test-design.prompt.md"
+
+
+def test_build_install_plan_uses_codex_prompt_target(workspace_tmp: Path) -> None:
+    workflow = get_workflow("scenario-test-design")
+    plan = build_install_plan(workflow, workspace_tmp, "codex")
+
+    assert plan[3].source == "commands/scenario-test-design.md"
+    assert plan[3].target == workspace_tmp / ".codex" / "prompts" / "scenario-test-design.md"
+
+
 def test_build_wiki_init_items_uses_agent_specific_command_target(workspace_tmp: Path) -> None:
     items = build_wiki_init_items(workspace_tmp, "research-notes", "claude")
     command_targets = {item.target for item in items if item.kind == "command"}
@@ -53,6 +69,20 @@ def test_build_wiki_init_items_uses_agent_specific_command_target(workspace_tmp:
     assert workspace_tmp / ".claude" / "commands" / "ingest.md" in command_targets
     assert workspace_tmp / ".roo" / "commands" / "ingest.md" not in command_targets
     assert "skill" not in {item.kind for item in items}
+
+
+def test_build_wiki_init_items_uses_copilot_prompt_file_target(workspace_tmp: Path) -> None:
+    items = build_wiki_init_items(workspace_tmp, "research-notes", "copilot")
+    command_targets = {item.target for item in items if item.kind == "command"}
+
+    assert workspace_tmp / ".github" / "prompts" / "ingest.prompt.md" in command_targets
+
+
+def test_build_wiki_init_items_uses_codex_prompt_target(workspace_tmp: Path) -> None:
+    items = build_wiki_init_items(workspace_tmp, "research-notes", "codex")
+    command_targets = {item.target for item in items if item.kind == "command"}
+
+    assert workspace_tmp / ".codex" / "prompts" / "ingest.md" in command_targets
 
 
 def test_build_install_plan_can_skip_agents_md(workspace_tmp: Path) -> None:

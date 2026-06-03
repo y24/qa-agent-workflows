@@ -55,7 +55,6 @@ qatool workflow uninstall
 qatool wiki init --name research-notes --agent roocode --yes
 qatool wiki update --yes
 qatool workflow install --workflow scenario-test-design --agent roocode --yes
-qatool workflow install --workflow scenario-test-design --agent claude --yes
 qatool workflow install --workflow all --agent roocode --yes
 qatool workflow update --workflow all --yes
 qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
@@ -66,7 +65,7 @@ qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
 | オプション | 対象 | 説明 |
 | --- | --- | --- |
 | `--target`, `-t` | `wiki init/update`, `workflow install/update/uninstall` | 配置先プロジェクトのディレクトリ。省略時はカレントディレクトリ。 |
-| `--agent`, `-a` | `wiki init`, `workflow install/uninstall` | commandの配置先agent。`roocode` または `claude`。 |
+| `--agent`, `-a` | `wiki init`, `workflow install/uninstall` | commandの配置先agent。`roocode`、`claude`、`copilot`、`codex`。 |
 | `--yes`, `-y` | `wiki init/update`, `workflow install/update/uninstall` | 確認プロンプトを省略して実行します。install/updateでは既存の生成物を上書きします。 |
 | `--workflow`, `-w` | `workflow install/update/uninstall` | 対象workflow ID。`all` を指定すると対象workflowをまとめて扱います。 |
 | `--agents-md` / `--no-agents-md` | `wiki update`, `workflow install/update` | `AGENTS.md` を作成・更新対象に含めるかを指定します。 |
@@ -105,6 +104,8 @@ qatool workflow install
 | `.agents/skills/<workflow>/` | workflow固有の `SKILL.md`、手順、判断基準、テンプレート。 |
 | `.roo/commands/<workflow>.md` | RooCode用のスラッシュコマンド。 |
 | `.claude/commands/<workflow>.md` | Claude用のスラッシュコマンド。 |
+| `.github/prompts/<workflow>.prompt.md` | GitHub Copilot用のprompt file。 |
+| `.codex/prompts/<workflow>.md` | Codex custom prompt用のMarkdown。 |
 | `.qa-toolkit/workflows.json` | インストール済みworkflowとリポジトリ単位の設定を記録する状態ファイル。 |
 
 対話実行では、対象 workflow、agent、`AGENTS.md` 作成有無、既存ファイルがある場合の扱いを選択できます。

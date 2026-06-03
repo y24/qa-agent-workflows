@@ -479,6 +479,58 @@ def test_install_can_skip_agents_md() -> None:
         shutil.rmtree(target, ignore_errors=True)
 
 
+def test_install_creates_copilot_prompt_file() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-copilot-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "risk-based-test-design",
+                "--agent",
+                "copilot",
+                "--target",
+                str(target),
+                "--no-agents-md",
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert (target / ".github" / "prompts" / "risk-based-test-design.prompt.md").is_file()
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_install_creates_codex_prompt_file() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-cli-codex-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(
+            app,
+            [
+                "workflow",
+                "install",
+                "--workflow",
+                "risk-based-test-design",
+                "--agent",
+                "codex",
+                "--target",
+                str(target),
+                "--no-agents-md",
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert (target / ".codex" / "prompts" / "risk-based-test-design.md").is_file()
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
 def test_install_records_workflow_metadata() -> None:
     target = Path("work") / "test-tmp" / f"qatool-cli-test-{uuid.uuid4().hex}"
     target.mkdir(parents=True)

@@ -43,7 +43,7 @@ src/qa_workflow_toolkit/assets/workflow/
   "skill_name": "example-workflow",
   "command_name": "example-workflow",
   "default_agent": "roocode",
-  "supported_agents": ["roocode", "claude"],
+  "supported_agents": ["roocode", "claude", "copilot", "codex"],
   "install": {
     "agents_md": true,
     "shared": {"source": "shared", "target": ".agents/shared"},
@@ -67,7 +67,7 @@ src/qa_workflow_toolkit/assets/workflow/
 ## Command Asset
 
 `src/qa_workflow_toolkit/assets/workflow/commands/<workflow>.md` は agent の command から skill を起動するための薄い入口にする。
-RooCode では `.roo/commands/<workflow>.md`、Claude では `.claude/commands/<workflow>.md` に配置される。
+RooCode では `.roo/commands/<workflow>.md`、Claude では `.claude/commands/<workflow>.md`、GitHub Copilot では `.github/prompts/<workflow>.prompt.md`、Codex では `.codex/prompts/<workflow>.md` に配置される。
 
 command には以下を含める。
 
@@ -126,6 +126,8 @@ shared を変更すると既存 workflow の `install` / `update` / `uninstall` 
 qatool workflow list
 qatool workflow install --workflow <workflow> --agent roocode --target work/tmp-<workflow>-roocode --yes
 qatool workflow install --workflow <workflow> --agent claude --target work/tmp-<workflow>-claude --yes
+qatool workflow install --workflow <workflow> --agent copilot --target work/tmp-<workflow>-copilot --yes
+qatool workflow install --workflow <workflow> --agent codex --target work/tmp-<workflow>-codex --yes
 qatool workflow update --workflow <workflow> --target work/tmp-<workflow>-roocode --yes
 qatool workflow uninstall --workflow <workflow> --target work/tmp-<workflow>-roocode --yes
 pytest
@@ -136,6 +138,8 @@ pytest
 - `workflow list` に ID、表示名、説明が出る。
 - RooCode の command が `.roo/commands/<workflow>.md` に配置される。
 - Claude の command が `.claude/commands/<workflow>.md` に配置される。
+- GitHub Copilot の prompt file が `.github/prompts/<workflow>.prompt.md` に配置される。
+- Codex の custom prompt が `.codex/prompts/<workflow>.md` に配置される。
 - skill が `.agents/skills/<workflow>/SKILL.md` として配置される。
 - shared が `.agents/shared/` に配置される。
 - `.qa-toolkit/workflows.json` に workflow metadata が記録される。
