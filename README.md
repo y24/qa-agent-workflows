@@ -106,7 +106,7 @@ qatool workflow install
 | `.claude/commands/<workflow>.md` | Claude用のスラッシュコマンド。 |
 | `.github/prompts/<workflow>.prompt.md` | GitHub Copilot用のprompt file。 |
 | `.codex/prompts/<workflow>.md` | Codex custom prompt用のMarkdown。 |
-| `.qa-toolkit/workflows.json` | インストール済みworkflowとリポジトリ単位の設定を記録する状態ファイル。 |
+| `.qatool/metadata.json` | インストール済みworkflowとリポジトリ単位の設定を記録する状態ファイル。 |
 
 対話実行では、対象 workflow、agent、`AGENTS.md` 作成有無、既存ファイルがある場合の扱いを選択できます。
 既存ファイルがある場合、通常は上書き、スキップ、`AGENTS.md` の別名作成を選べます。

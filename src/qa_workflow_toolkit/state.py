@@ -9,8 +9,10 @@ from typing import Any
 from .agents import DEFAULT_AGENT
 from .models import WorkflowManifest
 
-STATE_DIR_NAME = ".qa-toolkit"
-STATE_FILE_NAME = "workflows.json"
+STATE_DIR_NAME = ".qatool"
+STATE_FILE_NAME = "metadata.json"
+LEGACY_STATE_DIR_NAME = ".qa-toolkit"
+LEGACY_STATE_FILE_NAME = "workflows.json"
 STATE_SCHEMA_VERSION = 1
 AGENTS_MD_KIND_NONE = "none"
 AGENTS_MD_KIND_WIKI = "wiki"
@@ -36,6 +38,10 @@ class RepositoryConfig:
 
 def state_file_path(target: Path) -> Path:
     return target / STATE_DIR_NAME / STATE_FILE_NAME
+
+
+def legacy_state_file_path(target: Path) -> Path:
+    return target / LEGACY_STATE_DIR_NAME / LEGACY_STATE_FILE_NAME
 
 
 def load_repository_config(target: Path) -> RepositoryConfig | None:
@@ -112,6 +118,7 @@ def _save_installed_workflows(
     path = state_file_path(target)
     if not workflows and not keep_empty:
         path.unlink(missing_ok=True)
+        legacy_state_file_path(target).unlink(missing_ok=True)
         return
 
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -138,6 +145,7 @@ def _save_installed_workflows(
         ],
     }
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    legacy_state_file_path(target).unlink(missing_ok=True)
 
 
 def record_installed_workflows(
@@ -194,10 +202,10 @@ def remove_installed_workflows(target: Path, workflow_ids: list[str]) -> None:
 
 
 def _load_state_data(target: Path) -> dict[str, Any] | None:
-    path = state_file_path(target)
-    if not path.exists():
-        return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    for path in (state_file_path(target), legacy_state_file_path(target)):
+        if path.exists():
+            return json.loads(path.read_text(encoding="utf-8"))
+    return None
 
 
 def _now_iso() -> str:

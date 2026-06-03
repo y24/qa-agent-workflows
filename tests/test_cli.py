@@ -330,7 +330,7 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         assert (target / ".roo" / "commands" / "lint.md").is_file()
         assert (target / ".roo" / "commands" / "convert.md").is_file()
         assert not (target / ".agents" / "skills").exists()
-        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+        metadata = json.loads((target / ".qatool" / "metadata.json").read_text(encoding="utf-8"))
         assert metadata["agent"] == "roocode"
         assert metadata["include_agents_md"] is False
         assert metadata["agents_md_kind"] == "wiki"
@@ -354,7 +354,6 @@ def test_wiki_init_uses_target_folder_name_by_default_with_yes() -> None:
         assert "Select target agent" not in result.output
     finally:
         shutil.rmtree(target, ignore_errors=True)
-
 
 def test_wiki_update_overwrites_generated_wiki_assets_only() -> None:
     target = Path("work") / "test-tmp" / f"qatool-wiki-update-{uuid.uuid4().hex}"
@@ -477,7 +476,7 @@ def test_workflow_install_reuses_agent_recorded_by_wiki_init(monkeypatch: pytest
             ],
         )
 
-        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+        metadata = json.loads((target / ".qatool" / "metadata.json").read_text(encoding="utf-8"))
 
         assert wiki_result.exit_code == 0
         assert install_result.exit_code == 0
@@ -534,7 +533,7 @@ def test_workflow_uninstall_keeps_wiki_agents_md_when_state_identifies_it_as_wik
             ],
         )
 
-        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+        metadata = json.loads((target / ".qatool" / "metadata.json").read_text(encoding="utf-8"))
 
         assert wiki_result.exit_code == 0
         assert install_result.exit_code == 0
@@ -699,7 +698,7 @@ def test_install_records_workflow_metadata() -> None:
                 "--yes",
             ],
         )
-        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+        metadata = json.loads((target / ".qatool" / "metadata.json").read_text(encoding="utf-8"))
 
         assert result.exit_code == 0
         assert metadata["schema_version"] == 1
@@ -749,7 +748,7 @@ def test_install_reuses_recorded_agent_and_agents_md_choice(monkeypatch: pytest.
                 "--yes",
             ],
         )
-        metadata = json.loads((target / ".qa-toolkit" / "workflows.json").read_text(encoding="utf-8"))
+        metadata = json.loads((target / ".qatool" / "metadata.json").read_text(encoding="utf-8"))
         installed = {item["workflow_id"]: item for item in metadata["workflows"]}
 
         assert first_result.exit_code == 0
@@ -946,7 +945,7 @@ def test_uninstall_removes_workflow_specific_assets() -> None:
         assert not (target / ".roo" / "commands" / "scenario-test-design.md").exists()
         assert not (target / "AGENTS.md").exists()
         assert not (target / ".agents" / "shared").exists()
-        assert not (target / ".qa-toolkit" / "workflows.json").exists()
+        assert not (target / ".qatool" / "metadata.json").exists()
     finally:
         shutil.rmtree(target, ignore_errors=True)
 
@@ -1093,7 +1092,7 @@ def test_uninstall_keeps_common_assets_when_other_workflows_remain() -> None:
         assert "Removed 2 item(s)." in uninstall_result.output
         assert (target / "AGENTS.md").is_file()
         assert (target / ".agents" / "shared" / "common_contract.md").is_file()
-        assert (target / ".qa-toolkit" / "workflows.json").is_file()
+        assert (target / ".qatool" / "metadata.json").is_file()
         assert (target / ".agents" / "skills" / "scenario-test-design" / "SKILL.md").is_file()
         assert not (target / ".agents" / "skills" / "risk-based-test-design").exists()
     finally:

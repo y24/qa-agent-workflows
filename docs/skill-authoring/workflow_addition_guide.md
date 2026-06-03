@@ -142,7 +142,7 @@ pytest
 - Codex の custom prompt が `.codex/prompts/<workflow>.md` に配置される。
 - skill が `.agents/skills/<workflow>/SKILL.md` として配置される。
 - shared が `.agents/shared/` に配置される。
-- `.qa-toolkit/workflows.json` に workflow metadata が記録される。
+- `.qatool/metadata.json` に workflow metadata が記録される。
 - 2回目の install で一致 asset が `no change` になる。
 - uninstall で変更済み asset が削除されない。
 
