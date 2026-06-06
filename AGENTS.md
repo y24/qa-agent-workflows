@@ -4,15 +4,6 @@
 
 `qatool` はワークフローを直接実行しません。RooCodeやClaudeなどのAIコーディングエージェントが参照する `AGENTS.md`、`.agents/shared/`、`.agents/skills/<workflow>/`、agent別のcommandsをインストールすることに責務を限定します。
 
-## Common Working Rules
-
-- 要件、仕様、リスク、テスト条件を根拠なしに創作しない。
-- 事実、推測、前提、未確認事項、提案を分けて扱う。
-- 可能な限り、入力文書、前段成果物、IDへのトレーサビリティを残す。
-- 複数ステップの workflow は、ユーザーが明示的に継続を指示しない限り、主要ステップごとに停止してレビューを待つ。
-- 出力は原則として日本語の Markdown とする。入力またはユーザーが別言語を指定した場合はそれに従う。
-- 不明点、矛盾、証拠不足、未解決の前提は issue log または確認事項として明示する。
-
 ## Skill Routing
 
 - `$spec-extraction`: 開発文書からテスト設計に必要な仕様情報を抽出、正規化、棚卸しする。
@@ -39,7 +30,6 @@ qa-agent-workflows/
       models.py
       assets/
         workflow/
-          agents/roocode/AGENTS.md
           shared/
           workflows/<workflow>/
             workflow.json
@@ -66,23 +56,6 @@ qa-agent-workflows/
 配布対象の正は `src/qa_workflow_toolkit/assets/` 配下です。インストーラがコピーする実体は package assets 側に置きます。
 
 各 workflow は `workflow.json` をmanifestとし、skill本体は `skill/SKILL.md` を入口にする。詳細な実行手順は `steps/`、判断基準や定義は `references/`、出力形式は `templates/` に置く。
-
-## Output Location
-
-- ユーザーまたは作業対象リポジトリが出力先を指定している場合は、その指定を優先する。
-- 指定がない場合、業務実行時の成果物は原則として `outputs/<run_id>/` 配下に出力する。
-- `run_id` は `YYYYMMDDhhmm_<topic_slug>` 形式を基本とする。
-- 複数 skill をまたぐ作業では、同一 run ディレクトリ配下に skill 名ごとのサブディレクトリを作成する。
-- 最終成果物は `final/`、CSVやJSONなどの機械処理向け成果物は `exports/` に置く。
-- `src/qa_workflow_toolkit/assets/`、`shared/`、`docs/` に業務成果物を混在させない。
-- 詳細は `shared/output_location_policy.md` に従う。
-
-## Output Conventions
-
-- 大きな成果物は、要約、入力と参照元、主成果物、確認事項、次ステップへの引き継ぎの順に整理する。
-- 表は Markdown table を優先する。CSV変換を想定する成果物は列名を安定させる。
-- 推測が必要な場合は `推測:` と明記し、根拠または確認事項を添える。
-- 判断できない場合は、無理に埋めず `要確認`、`情報不足`、`対象外` などの状態を使う。
 
 ## Change Policy
 
