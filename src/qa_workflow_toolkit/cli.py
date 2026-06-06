@@ -163,6 +163,55 @@ def _run_wiki_update(
         console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
 
 
+def _run_wiki_change_agent(
+    target: Path,
+    yes: bool,
+    show_header: bool,
+) -> None:
+    if show_header:
+        print_header()
+    resolved_target = target.resolve()
+    repository_config = load_repository_config(resolved_target)
+    if not _has_installed_wiki(resolved_target, repository_config):
+        console.print("[yellow]No initialized wiki assets were found.[/yellow]")
+        raise typer.Exit(1)
+
+    current_agent = _resolve_wiki_update_agent(yes=True, target=resolved_target, repository_config=repository_config)
+    console.print(f"Current agent: [cyan]{current_agent}[/cyan]")
+    new_agent = _select_agent(SUPPORTED_WIKI_AGENTS, current_agent)
+    if new_agent == current_agent:
+        console.print("[yellow]Agent is unchanged.[/yellow]")
+        return
+
+    old_agent_spec = get_agent_spec(current_agent)
+    old_commands = [
+        resolved_target / old_agent_spec.command_target_dir / old_agent_spec.command_filename(op)
+        for op in WIKI_OPERATIONS
+    ]
+    old_existing = [p for p in old_commands if p.exists()]
+
+    wiki_name = resolve_existing_wiki_name(resolved_target)
+    new_items = [
+        item for item in build_wiki_update_items(resolved_target, wiki_name, new_agent)
+        if item.kind == "command"
+    ]
+    print_wiki_update_plan(new_items)
+    if not yes and not _questionary().confirm("Change wiki agent?", default=True).ask():
+        raise typer.Exit(1)
+
+    for p in old_existing:
+        p.unlink()
+    _remove_empty_dirs(resolved_target / old_agent_spec.command_target_dir, resolved_target)
+    init_wiki_from_items(new_items, overwrite=True)
+    record_repository_config(
+        resolved_target,
+        new_agent,
+        include_agents_md=False,
+        agents_md_kind=repository_config.agents_md_kind if repository_config else None,
+    )
+    console.print(f"\n[green]Wiki agent changed to {new_agent}.[/green]")
+
+
 @workflow_app.command("list")
 def list_workflows() -> None:
     """Show available workflows."""
@@ -298,6 +347,59 @@ def _run_workflow_update(
         console.print(f"[yellow]Skipped {len(result.skipped)} item(s).[/yellow]")
 
 
+def _run_workflow_change_agent(
+    target: Path,
+    yes: bool,
+    show_header: bool,
+) -> None:
+    if show_header:
+        print_header()
+    workflows = load_workflows()
+    resolved_target = target.resolve()
+    installed_metadata = _installed_workflow_metadata(workflows, resolved_target)
+    if not installed_metadata:
+        console.print("[yellow]No installed workflow assets were found.[/yellow]")
+        raise typer.Exit(1)
+
+    selected_metadata = list(installed_metadata.values())
+    selected_workflows = [get_workflow(metadata.workflow_id) for metadata in selected_metadata]
+    current_agent = next(iter(installed_metadata.values())).agent
+    supported_agents = tuple(sorted(set.intersection(*(set(item.supported_agents) for item in selected_workflows))))
+
+    console.print(f"Current agent: [cyan]{current_agent}[/cyan]")
+    new_agent = _select_agent(supported_agents, current_agent)
+    if new_agent == current_agent:
+        console.print("[yellow]Agent is unchanged.[/yellow]")
+        return
+
+    uninstall_plan = _dedupe_uninstall_plan(
+        item
+        for metadata in selected_metadata
+        for selected_workflow in [get_workflow(metadata.workflow_id)]
+        for item in build_uninstall_plan(selected_workflow, resolved_target, current_agent, include_shared=False)
+        if item.kind == "command"
+    )
+    install_plan = _dedupe_plan(
+        item
+        for selected_workflow in selected_workflows
+        for item in build_install_plan(selected_workflow, resolved_target, new_agent)
+        if item.kind == "command"
+    )
+    install_plan = apply_default_actions(install_plan, CollisionAction.OVERWRITE)
+
+    print_uninstall_plan(uninstall_plan)
+    print_plan(install_plan)
+    if not yes and not _questionary().confirm("Change agent?", default=True).ask():
+        raise typer.Exit(1)
+
+    uninstall_from_plan(uninstall_plan)
+    _remove_empty_dirs(resolved_target / get_agent_spec(current_agent).command_target_dir, resolved_target)
+    install_from_plan(install_plan)
+    for metadata in selected_metadata:
+        record_installed_workflows(resolved_target, [get_workflow(metadata.workflow_id)], new_agent)
+    console.print(f"\n[green]Agent changed to {new_agent}.[/green]")
+
+
 @workflow_app.command()
 def uninstall(
     workflow: Optional[str] = typer.Option(None, "--workflow", "-w", help="Installed workflow ID to uninstall, or 'all'."),
@@ -390,6 +492,7 @@ def _interactive_workflow_menu(questionary) -> None:
         choices.extend(
             [
                 questionary.Choice("update - インストール済みの workflow skills を最新版に更新", value="update"),
+                questionary.Choice("change-agent - インストール済みの workflow skills のエージェントを変更", value="change-agent"),
                 questionary.Choice("uninstall - インストール済みの workflow skills を削除", value="uninstall"),
             ]
         )
@@ -410,6 +513,8 @@ def _interactive_workflow_menu(questionary) -> None:
         _run_workflow_install(workflow=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "update":
         _run_workflow_update(workflow=None, target=Path.cwd(), yes=False, show_header=False)
+    elif selected_operation == "change-agent":
+        _run_workflow_change_agent(target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "uninstall":
         _run_workflow_uninstall(workflow=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "list":
@@ -425,6 +530,7 @@ def _interactive_wiki_menu(questionary) -> None:
     ]
     if has_installed_wiki:
         choices.append(questionary.Choice("update - 初期化済みの LLM wiki assets を最新版に更新", value="update"))
+        choices.append(questionary.Choice("change-agent - 初期化済みの LLM wiki assets のエージェントを変更", value="change-agent"))
     choices.append(questionary.Choice("help - wiki コマンドのヘルプを表示", value="help"))
     selected_operation = questionary.select(
         "Select wiki operation",
@@ -437,6 +543,8 @@ def _interactive_wiki_menu(questionary) -> None:
         _run_wiki_init(name=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "update":
         _run_wiki_update(target=Path.cwd(), yes=False, agents_md=None, show_header=False)
+    elif selected_operation == "change-agent":
+        _run_wiki_change_agent(target=Path.cwd(), yes=False, show_header=False)
     else:
         print_usage(show_header=False)
 
@@ -654,6 +762,17 @@ def _require_installed(workflow: WorkflowManifest, target: Path) -> WorkflowMani
 
 def _is_workflow_installed(workflow: WorkflowManifest, target: Path) -> bool:
     return (target / workflow.install.skill.target / "SKILL.md").exists() or (target / workflow.install.command.target).exists()
+
+
+def _remove_empty_dirs(directory: Path, stop_at: Path) -> None:
+    stop = stop_at.resolve()
+    current = directory.resolve()
+    while current != stop and current.is_relative_to(stop):
+        if current.is_dir() and not any(current.iterdir()):
+            current.rmdir()
+            current = current.parent
+        else:
+            break
 
 
 def _questionary():
