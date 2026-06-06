@@ -6,7 +6,7 @@
 指定がない場合、業務実行時の成果物は以下へ出力する。
 
 ```text
-outputs/runs/<run_id>/
+outputs/<run_id>/
 ```
 
 ## Run ID
@@ -14,7 +14,7 @@ outputs/runs/<run_id>/
 `run_id` は以下の形式を基本とする。
 
 ```text
-YYYYMMDD-HHMMSS_<topic_slug>
+YYYYMMDDhhmm_<topic_slug>
 ```
 
 - 日時は作業開始時点のローカル時刻を使う。
@@ -24,7 +24,7 @@ YYYYMMDD-HHMMSS_<topic_slug>
 ## Standard Run Layout
 
 ```text
-outputs/runs/<run_id>/
+outputs/<run_id>/
   _run_manifest.md
   _input_inventory.md
   _issue_log.md
@@ -37,12 +37,12 @@ outputs/runs/<run_id>/
 
 | Path | Role |
 |---|---|
-| `outputs/runs/<run_id>/_run_manifest.md` | run の目的、使用 skill、出力先、開始時刻などのメタ情報 |
-| `outputs/runs/<run_id>/_input_inventory.md` | 入力文書、前段成果物、参照元の一覧 |
-| `outputs/runs/<run_id>/_issue_log.md` | skill 横断の未解決事項、矛盾、不足、確認事項 |
-| `outputs/runs/<run_id>/<skill-name>/` | skill ごとの中間成果物、Step 成果物、handoff |
-| `outputs/runs/<run_id>/final/` | 人間が読む最終成果物 |
-| `outputs/runs/<run_id>/exports/` | CSV、JSON、Excel 変換用などの機械処理向け成果物 |
+| `outputs/<run_id>/_run_manifest.md` | run の目的、使用 skill、出力先、開始時刻などのメタ情報 |
+| `outputs/<run_id>/_input_inventory.md` | 入力文書、前段成果物、参照元の一覧 |
+| `outputs/<run_id>/_issue_log.md` | skill 横断の未解決事項、矛盾、不足、確認事項 |
+| `outputs/<run_id>/<skill-name>/` | skill ごとの中間成果物、Step 成果物、handoff |
+| `outputs/<run_id>/final/` | 人間が読む最終成果物 |
+| `outputs/<run_id>/exports/` | CSV、JSON、Excel 変換用などの機械処理向け成果物 |
 
 ## Rules
 

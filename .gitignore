@@ -1,6 +1,6 @@
 # Runtime outputs
-outputs/runs/*
-!outputs/runs/.gitkeep
+outputs/*
+!outputs/.gitkeep
 
 # Shareable examples may be committed intentionally.
 !outputs/examples/

@@ -70,8 +70,8 @@ qa-agent-workflows/
 ## Output Location
 
 - ユーザーまたは作業対象リポジトリが出力先を指定している場合は、その指定を優先する。
-- 指定がない場合、業務実行時の成果物は原則として `outputs/runs/<run_id>/` 配下に出力する。
-- `run_id` は `YYYYMMDD-HHMMSS_<topic_slug>` 形式を基本とする。
+- 指定がない場合、業務実行時の成果物は原則として `outputs/<run_id>/` 配下に出力する。
+- `run_id` は `YYYYMMDDhhmm_<topic_slug>` 形式を基本とする。
 - 複数 skill をまたぐ作業では、同一 run ディレクトリ配下に skill 名ごとのサブディレクトリを作成する。
 - 最終成果物は `final/`、CSVやJSONなどの機械処理向け成果物は `exports/` に置く。
 - `src/qa_workflow_toolkit/assets/`、`shared/`、`docs/` に業務成果物を混在させない。
