@@ -1,6 +1,6 @@
 {
   "id": "pr-change-analysis",
-  "display_name": "PR変更分析",
+  "display_name": "PR変更内容から差分レポートを作成・リスク等を分析",
   "description": "Azure DevOpsのPull Requestの差分・Description・レビューコメントから、変更内容をQA向けに整理した差分レポートと、リスク・テスト観点（特に非機能）を提案する分析レポートを作る",
   "version": "0.1.0",
   "sort_order": 900,

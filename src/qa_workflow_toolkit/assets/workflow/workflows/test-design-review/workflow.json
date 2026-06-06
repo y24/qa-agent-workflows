@@ -1,6 +1,6 @@
 {
   "id": "test-design-review",
-  "display_name": "テスト設計レビュー",
+  "display_name": "テスト設計文書をレビュー",
   "description": "既存のテスト設計書、観点表、テストケース一覧を根拠付きでレビューする",
   "version": "0.1.0",
   "sort_order": 600,

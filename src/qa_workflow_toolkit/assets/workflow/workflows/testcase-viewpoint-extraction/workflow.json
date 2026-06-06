@@ -1,6 +1,6 @@
 {
   "id": "testcase-viewpoint-extraction",
-  "display_name": "テストケース観点抽出",
+  "display_name": "既存テストケース一覧からテスト観点を抽出し、カタログ化",
   "description": "既存テストケースから意図、抽象テスト観点、観点カタログ、トレーサビリティを抽出する",
   "version": "0.1.0",
   "sort_order": 400,

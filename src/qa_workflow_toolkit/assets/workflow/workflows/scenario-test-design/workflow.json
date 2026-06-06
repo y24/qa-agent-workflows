@@ -1,6 +1,6 @@
 {
   "id": "scenario-test-design",
-  "display_name": "シナリオテスト設計",
+  "display_name": "開発文書からシナリオテストを設計",
   "description": "要件、業務フロー、画面仕様、ドメインルールからシナリオテストを設計する",
   "version": "0.1.0",
   "sort_order": 100,

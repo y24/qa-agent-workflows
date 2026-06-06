@@ -1,6 +1,6 @@
 {
   "id": "risk-based-test-design",
-  "display_name": "リスクベーステスト設計",
+  "display_name": "開発文書からリスクベーステストを設計",
   "description": "リスク候補の抽出、評価、優先度付け、リスクベースのテスト方針とテストケース骨子を作る",
   "version": "0.1.0",
   "sort_order": 200,

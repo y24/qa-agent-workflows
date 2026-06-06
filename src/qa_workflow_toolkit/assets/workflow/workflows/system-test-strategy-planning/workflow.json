@@ -1,6 +1,6 @@
 {
   "id": "system-test-strategy-planning",
-  "display_name": "システムテスト戦略策定",
+  "display_name": "開発文書からシステムテスト戦略を策定",
   "description": "開発文書を根拠に、システムテストでカバーすべき非機能、テスト種別、テスト観点、品質特性マトリクスを整理する",
   "version": "0.1.0",
   "sort_order": 800,

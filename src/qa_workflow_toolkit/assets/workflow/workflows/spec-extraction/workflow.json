@@ -1,6 +1,6 @@
 {
   "id": "spec-extraction",
-  "display_name": "仕様抽出",
+  "display_name": "開発文書からテスト設計に必要な仕様情報を抽出",
   "description": "開発文書からテスト設計に必要な仕様情報を抽出、正規化、棚卸しする",
   "version": "0.1.0",
   "sort_order": 300,
