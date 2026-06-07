@@ -53,7 +53,7 @@ def print_usage(show_header: bool = True) -> None:
     console.print("  qatool workflow list       Show available workflows\n")
     console.print("[bold]Examples[/bold]")
     console.print("  qatool wiki init")
-    console.print("  qatool wiki init --name research-notes --agent roocode --yes")
+    console.print("  qatool wiki init --name research-notes --type basic --agent roocode --yes")
     console.print("  qatool wiki init --name research-notes --agent claude --yes")
     console.print("  qatool wiki init --name research-notes --agent copilot --yes")
     console.print("  qatool wiki init --name research-notes --agent codex --yes")

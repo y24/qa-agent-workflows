@@ -332,6 +332,7 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         assert metadata["agent"] == "roocode"
         assert metadata["include_agents_md"] is False
         assert metadata["agents_md_kind"] == "wiki"
+        assert metadata["wiki_type"] == "basic"
         assert metadata["workflows"] == []
         assert "Research Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
         assert 'markitdown "<input>" -o "<output>"' in (
@@ -339,6 +340,120 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         ).read_text(encoding="utf-8")
     finally:
         shutil.rmtree(target, ignore_errors=True)
+
+
+def test_wiki_init_accepts_basic_type_explicitly() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-basic-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--name",
+                "Basic Wiki",
+                "--type",
+                "Basic",
+                "--agent",
+                "roocode",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+        metadata = json.loads((target / ".qatool" / "metadata.json").read_text(encoding="utf-8"))
+
+        assert result.exit_code == 0
+        assert metadata["wiki_type"] == "basic"
+        assert "Basic Wiki LLM Wiki" in (target / "AGENTS.md").read_text(encoding="utf-8")
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_wiki_init_rejects_unknown_type() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-unknown-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    try:
+        result = CliRunner().invoke(
+            app,
+            [
+                "wiki",
+                "init",
+                "--type",
+                "unknown",
+                "--target",
+                str(target),
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code != 0
+        assert "unsupported wiki type: unknown" in result.output
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_interactive_wiki_init_prompts_for_wiki_type(
+    monkeypatch: pytest.MonkeyPatch,
+    workspace_tmp: Path,
+) -> None:
+    workspace = workspace_tmp.resolve()
+    monkeypatch.chdir(workspace)
+    select_responses = ["wiki", "init", "basic", "roocode"]
+    select_messages: list[str] = []
+    text_messages: list[str] = []
+
+    class FakeChoice:
+        def __init__(self, title: str, value: str) -> None:
+            self.title = title
+            self.value = value
+
+    class SelectPrompt:
+        def __init__(self, message: str) -> None:
+            self.message = message
+
+        def ask(self) -> str:
+            select_messages.append(self.message)
+            return select_responses.pop(0)
+
+    class TextPrompt:
+        def __init__(self, message: str) -> None:
+            self.message = message
+
+        def ask(self) -> str:
+            text_messages.append(self.message)
+            return "Interactive Wiki"
+
+    class ConfirmPrompt:
+        def ask(self) -> bool:
+            return True
+
+    class FakeQuestionary:
+        Choice = FakeChoice
+
+        @staticmethod
+        def select(message: str, choices: list[FakeChoice] | list[str], default: str | None = None) -> SelectPrompt:
+            return SelectPrompt(message)
+
+        @staticmethod
+        def text(message: str, default: str) -> TextPrompt:
+            return TextPrompt(message)
+
+        @staticmethod
+        def confirm(message: str, default: bool = True) -> ConfirmPrompt:
+            return ConfirmPrompt()
+
+    monkeypatch.setattr("qa_workflow_toolkit.cli._questionary", lambda: FakeQuestionary)
+
+    result = CliRunner().invoke(app, [])
+    metadata = json.loads((workspace / ".qatool" / "metadata.json").read_text(encoding="utf-8"))
+
+    assert result.exit_code == 0
+    assert text_messages == ["Wiki name"]
+    assert select_messages == ["Select command", "Select wiki operation", "Select wiki type", "Select target agent"]
+    assert metadata["wiki_type"] == "basic"
+    assert "<!-- wiki-type: basic -->" in (workspace / "AGENTS.md").read_text(encoding="utf-8")
 
 
 def test_wiki_init_uses_target_folder_name_by_default_with_yes() -> None:

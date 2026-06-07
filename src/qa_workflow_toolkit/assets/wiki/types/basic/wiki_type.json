@@ -1,0 +1,8 @@
+{
+  "id": "basic",
+  "display_name": "Basic",
+  "description": "汎用的なLLM wikiを構築する標準タイプ。",
+  "version": "1.0.0",
+  "sort_order": 100,
+  "default": true
+}

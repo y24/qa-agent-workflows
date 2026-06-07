@@ -52,7 +52,7 @@ qatool workflow uninstall
 非対話で実行する場合は、以下のように対象 workflow、agent、上書き可否をオプションで指定します。
 
 ```bash
-qatool wiki init --name research-notes --agent roocode --yes
+qatool wiki init --name research-notes --type basic --agent roocode --yes
 qatool wiki update --yes
 qatool workflow install --workflow scenario-test-design --agent roocode --yes
 qatool workflow install --workflow all --agent roocode --yes
@@ -66,6 +66,7 @@ qatool workflow uninstall --workflow scenario-test-design --agent roocode --yes
 | --- | --- | --- |
 | `--target`, `-t` | `wiki init/update`, `workflow install/update/uninstall` | 配置先プロジェクトのディレクトリ。省略時はカレントディレクトリ。 |
 | `--agent`, `-a` | `wiki init`, `workflow install/uninstall` | commandの配置先agent。`roocode`、`claude`、`copilot`、`codex`。 |
+| `--type` | `wiki init` | 構築するwikiタイプ。省略時は `basic`。 |
 | `--yes`, `-y` | `wiki init/update`, `workflow install/update/uninstall` | 確認プロンプトを省略して実行します。install/updateでは既存の生成物を上書きします。 |
 | `--workflow`, `-w` | `workflow install/update/uninstall` | 対象workflow ID。`all` を指定すると対象workflowをまとめて扱います。 |
 | `--agents-md` / `--no-agents-md` | `wiki update` | `AGENTS.md` を更新対象に含めるかを指定します。 |
@@ -152,7 +153,14 @@ qatool wiki init
 ```
 
 - 名称の入力: wikiの名前入を入力します。そのままEnterすると、対象ディレクトリ名をwiki名として使います。
+- wiki type選択: 構築目的に応じたwikiタイプを選択します。現在の汎用wikiは `Basic` です。
 - agent選択: スラッシュコマンド用の.mdファイルが選択したエージェントに応じたフォルダに配置されます。
+
+非対話でBasic wikiを作る場合:
+
+```bash
+qatool wiki init --name research-notes --type basic --agent roocode --yes
+```
 
 作成される主なファイルとディレクトリ:
 
@@ -170,6 +178,25 @@ target-project/
    ├─ lint.md
    └─ convert.md
 ```
+
+package assets側のwiki typeテンプレートは以下の構成で管理します。新しいwiki typeを追加する場合は、`types/<wiki-type>/` を追加し、CLI側のwiki type registryに選択肢を追加します。
+
+```text
+src/qa_workflow_toolkit/assets/wiki/
+└─ types/
+   └─ basic/
+      ├─ AGENTS.md
+      ├─ wiki_type.json
+      ├─ index.md
+      ├─ log.md
+      └─ commands/
+         ├─ ingest.md
+         ├─ query.md
+         ├─ lint.md
+         └─ convert.md
+```
+
+`wiki_type.json` には `id`、`display_name`、`description`、`version`、任意の `sort_order` と `default` を定義します。CLIのwiki type選択肢はこのmanifestから生成されます。
 
 ### wiki assetsの更新
 

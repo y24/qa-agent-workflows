@@ -80,6 +80,37 @@ class WorkflowManifest:
 
 
 @dataclass(frozen=True)
+class WikiTypeManifest:
+    id: str
+    display_name: str
+    description: str
+    version: str
+    sort_order: int | None
+    is_default: bool
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "WikiTypeManifest":
+        required = [
+            "id",
+            "display_name",
+            "description",
+            "version",
+        ]
+        missing = [key for key in required if key not in data]
+        if missing:
+            raise ValueError(f"wiki type manifest is missing required fields: {', '.join(missing)}")
+
+        return cls(
+            id=str(data["id"]),
+            display_name=str(data["display_name"]),
+            description=str(data["description"]),
+            version=str(data["version"]),
+            sort_order=int(data["sort_order"]) if data.get("sort_order") is not None else None,
+            is_default=bool(data.get("default", False)),
+        )
+
+
+@dataclass(frozen=True)
 class InstallPlanItem:
     kind: str
     source: str

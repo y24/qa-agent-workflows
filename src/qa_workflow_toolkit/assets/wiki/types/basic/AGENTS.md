@@ -1,5 +1,6 @@
 <!-- generated-by: qa-workflow-toolkit -->
 <!-- wiki-name: [[wiki_name]] -->
+<!-- wiki-type: [[wiki_type]] -->
 
 # [[wiki_name]] LLM Wiki
 

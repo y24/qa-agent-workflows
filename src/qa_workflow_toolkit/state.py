@@ -34,6 +34,7 @@ class RepositoryConfig:
     agent: str
     include_agents_md: bool
     agents_md_kind: str
+    wiki_type: str | None = None
 
 
 def state_file_path(target: Path) -> Path:
@@ -52,6 +53,7 @@ def load_repository_config(target: Path) -> RepositoryConfig | None:
         agent=str(data["agent"]),
         include_agents_md=bool(data.get("include_agents_md", False)),
         agents_md_kind=_agents_md_kind(data),
+        wiki_type=str(data["wiki_type"]) if data.get("wiki_type") else None,
     )
 
 
@@ -84,6 +86,7 @@ def save_installed_workflows(target: Path, workflows: dict[str, InstalledWorkflo
         agent=config.agent if config else None,
         include_agents_md=config.include_agents_md if config else None,
         agents_md_kind=config.agents_md_kind if config else None,
+        wiki_type=config.wiki_type if config else None,
         keep_empty=config is not None,
     )
 
@@ -93,15 +96,18 @@ def record_repository_config(
     agent: str,
     include_agents_md: bool = False,
     agents_md_kind: str | None = None,
+    wiki_type: str | None = None,
 ) -> None:
     config = load_repository_config(target)
     resolved_agents_md_kind = agents_md_kind or (config.agents_md_kind if config else AGENTS_MD_KIND_NONE)
+    resolved_wiki_type = wiki_type if wiki_type is not None else (config.wiki_type if config else None)
     _save_installed_workflows(
         target,
         load_installed_workflows(target),
         agent=agent,
         include_agents_md=include_agents_md,
         agents_md_kind=resolved_agents_md_kind,
+        wiki_type=resolved_wiki_type,
         keep_empty=True,
     )
 
@@ -112,6 +118,7 @@ def _save_installed_workflows(
     agent: str | None = None,
     include_agents_md: bool | None = None,
     agents_md_kind: str | None = None,
+    wiki_type: str | None = None,
     keep_empty: bool = False,
 ) -> None:
     path = state_file_path(target)
@@ -143,6 +150,8 @@ def _save_installed_workflows(
             for workflow in sorted(workflows.values(), key=lambda item: item.workflow_id)
         ],
     }
+    if wiki_type:
+        data["wiki_type"] = wiki_type
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     legacy_state_file_path(target).unlink(missing_ok=True)
 
@@ -172,6 +181,7 @@ def record_installed_workflows(
         agent=agent,
         include_agents_md=False,
         agents_md_kind=agents_md_kind,
+        wiki_type=config.wiki_type if config else None,
         keep_empty=True,
     )
 
@@ -188,6 +198,7 @@ def remove_installed_workflows(target: Path, workflow_ids: list[str]) -> None:
         agent=config.agent if config else None,
         include_agents_md=config.include_agents_md if config else None,
         agents_md_kind=config.agents_md_kind if config else None,
+        wiki_type=config.wiki_type if config else None,
         keep_empty=(
             (not had_workflows and config is not None)
             or (not installed and config is not None and config.agents_md_kind == AGENTS_MD_KIND_WIKI)

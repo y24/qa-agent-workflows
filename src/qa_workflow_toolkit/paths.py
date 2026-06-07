@@ -20,3 +20,7 @@ def asset_path(relative_path: str) -> Traversable:
 
 def workflow_asset_path(relative_path: str) -> Traversable:
     return asset_path(f"workflow/{relative_path}")
+
+
+def wiki_asset_path(relative_path: str) -> Traversable:
+    return asset_path(f"wiki/{relative_path}")

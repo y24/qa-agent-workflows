@@ -24,7 +24,7 @@ from .installer import (
     uninstall_from_plan,
 )
 from .models import CollisionAction, InstallPlanItem, UninstallPlanItem, WorkflowManifest
-from .registry import get_workflow, load_workflows
+from .registry import default_wiki_type, get_workflow, load_wiki_types, load_workflows
 from .state import (
     AGENTS_MD_KIND_WIKI,
     InstalledWorkflow,
@@ -42,6 +42,7 @@ from .wiki import (
     build_wiki_update_items,
     init_wiki_from_items,
     is_wiki_initialized,
+    resolve_wiki_type,
     resolve_existing_wiki_name,
     wiki_item_matches_target,
 )
@@ -63,12 +64,13 @@ def callback(ctx: typer.Context) -> None:
 @wiki_app.command("init")
 def init_wiki(
     name: Optional[str] = typer.Option(None, "--name", "-n", help="Wiki name. Defaults to the target folder name."),
+    wiki_type: Optional[str] = typer.Option(None, "--type", help="Wiki type. Defaults to the default wiki type."),
     agent: Optional[str] = typer.Option(None, "--agent", "-a", help="Target agent."),
     target: Path = typer.Option(Path.cwd(), "--target", "-t", help="Target wiki directory."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Overwrite existing generated files without prompting."),
 ) -> None:
     """Initialize an LLM wiki in a project."""
-    _run_wiki_init(name=name, agent=agent, target=target, yes=yes, show_header=True)
+    _run_wiki_init(name=name, wiki_type=wiki_type, agent=agent, target=target, yes=yes, show_header=True)
 
 
 @wiki_app.command("update")
@@ -87,6 +89,7 @@ def update_wiki(
 
 def _run_wiki_init(
     name: Optional[str],
+    wiki_type: Optional[str],
     agent: Optional[str],
     target: Path,
     yes: bool,
@@ -97,10 +100,11 @@ def _run_wiki_init(
     resolved_target = target.resolve()
     wiki_name = name or _resolve_wiki_name(resolved_target, yes)
     repository_config = load_repository_config(resolved_target)
+    selected_wiki_type = _resolve_wiki_type(wiki_type, yes, prompt=agent is None)
     selected_agent = agent or _resolve_wiki_agent(yes, repository_config)
     if selected_agent not in SUPPORTED_WIKI_AGENTS:
         raise typer.BadParameter(f"unsupported agent: {selected_agent}")
-    plan = build_wiki_init_items(resolved_target, wiki_name, selected_agent)
+    plan = build_wiki_init_items(resolved_target, wiki_name, selected_agent, selected_wiki_type)
     overwrite = yes
     overwrite_targets = _resolve_wiki_init_overwrites(plan, yes)
 
@@ -109,7 +113,13 @@ def _run_wiki_init(
         raise typer.Exit(1)
 
     result = init_wiki_from_items(plan, overwrite=overwrite, overwrite_targets=overwrite_targets)
-    record_repository_config(resolved_target, selected_agent, include_agents_md=False, agents_md_kind=AGENTS_MD_KIND_WIKI)
+    record_repository_config(
+        resolved_target,
+        selected_agent,
+        include_agents_md=False,
+        agents_md_kind=AGENTS_MD_KIND_WIKI,
+        wiki_type=selected_wiki_type,
+    )
     console.print(f"\n[green]Created {len(result.created)} item(s).[/green]")
     if result.overwritten:
         console.print(f"[yellow]Overwritten {len(result.overwritten)} item(s).[/yellow]")
@@ -138,8 +148,9 @@ def _run_wiki_update(
 
     selected_agent = _resolve_wiki_update_agent(yes, resolved_target, repository_config)
     wiki_name = resolve_existing_wiki_name(resolved_target)
+    selected_wiki_type = _configured_wiki_type(repository_config)
     include_agents_md = agents_md if agents_md is not None else _should_update_wiki_agents_md(repository_config)
-    plan = build_wiki_update_items(resolved_target, wiki_name, selected_agent)
+    plan = build_wiki_update_items(resolved_target, wiki_name, selected_agent, selected_wiki_type)
     if not include_agents_md:
         plan = [item for item in plan if item.kind != "agents_md"]
     plan = [item for item in plan if not wiki_item_matches_target(item)]
@@ -157,6 +168,7 @@ def _run_wiki_update(
         selected_agent,
         include_agents_md=False,
         agents_md_kind=AGENTS_MD_KIND_WIKI if include_agents_md else (repository_config.agents_md_kind if repository_config else None),
+        wiki_type=selected_wiki_type,
     )
     console.print(f"\n[green]Updated {len(result.created) + len(result.overwritten)} item(s).[/green]")
     if result.skipped:
@@ -191,8 +203,9 @@ def _run_wiki_change_agent(
     old_existing = [p for p in old_commands if p.exists()]
 
     wiki_name = resolve_existing_wiki_name(resolved_target)
+    selected_wiki_type = _configured_wiki_type(repository_config)
     new_items = [
-        item for item in build_wiki_update_items(resolved_target, wiki_name, new_agent)
+        item for item in build_wiki_update_items(resolved_target, wiki_name, new_agent, selected_wiki_type)
         if item.kind == "command"
     ]
     print_wiki_update_plan(new_items)
@@ -208,6 +221,7 @@ def _run_wiki_change_agent(
         new_agent,
         include_agents_md=False,
         agents_md_kind=repository_config.agents_md_kind if repository_config else None,
+        wiki_type=selected_wiki_type,
     )
     console.print(f"\n[green]Wiki agent changed to {new_agent}.[/green]")
 
@@ -540,7 +554,7 @@ def _interactive_wiki_menu(questionary) -> None:
         raise typer.Exit(1)
 
     if selected_operation == "init":
-        _run_wiki_init(name=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
+        _run_wiki_init(name=None, wiki_type=None, agent=None, target=Path.cwd(), yes=False, show_header=False)
     elif selected_operation == "update":
         _run_wiki_update(target=Path.cwd(), yes=False, agents_md=None, show_header=False)
     elif selected_operation == "change-agent":
@@ -557,6 +571,26 @@ def _resolve_wiki_name(target: Path, yes: bool) -> str:
     if selected is None:
         raise typer.Exit(1)
     return str(selected).strip() or default_name
+
+
+def _resolve_wiki_type(wiki_type: Optional[str], yes: bool, prompt: bool) -> str:
+    if wiki_type is not None:
+        try:
+            return resolve_wiki_type(wiki_type).id
+        except ValueError as exc:
+            raise typer.BadParameter(str(exc)) from exc
+    if yes or not prompt:
+        return default_wiki_type().id
+    return _select_wiki_type(default_wiki_type().id)
+
+
+def _configured_wiki_type(repository_config: RepositoryConfig | None) -> str:
+    if repository_config is None:
+        return default_wiki_type().id
+    try:
+        return resolve_wiki_type(repository_config.wiki_type).id
+    except ValueError:
+        return default_wiki_type().id
 
 
 def _resolve_wiki_agent(yes: bool, repository_config: RepositoryConfig | None = None) -> str:
@@ -639,6 +673,18 @@ def _select_installed_workflow(workflows: list[WorkflowManifest]) -> str:
 def _select_agent(supported_agents: tuple[str, ...], default_agent: str) -> str:
     questionary = _questionary()
     selected = questionary.select("Select target agent", choices=list(supported_agents), default=default_agent).ask()
+    if not selected:
+        raise typer.Exit(1)
+    return str(selected)
+
+
+def _select_wiki_type(default_wiki_type: str) -> str:
+    questionary = _questionary()
+    choices = [
+        questionary.Choice(f"{wiki_type.display_name} - {wiki_type.description}", value=wiki_type.id)
+        for wiki_type in load_wiki_types()
+    ]
+    selected = questionary.select("Select wiki type", choices=choices, default=default_wiki_type).ask()
     if not selected:
         raise typer.Exit(1)
     return str(selected)

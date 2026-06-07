@@ -1,5 +1,13 @@
-from qa_workflow_toolkit.models import WorkflowManifest
-from qa_workflow_toolkit.registry import _workflow_sort_key, get_workflow, load_workflows
+from qa_workflow_toolkit.models import WikiTypeManifest, WorkflowManifest
+from qa_workflow_toolkit.registry import (
+    _wiki_type_sort_key,
+    _workflow_sort_key,
+    default_wiki_type,
+    get_wiki_type,
+    get_workflow,
+    load_wiki_types,
+    load_workflows,
+)
 
 
 def test_load_workflows_contains_expected_workflows() -> None:
@@ -53,6 +61,40 @@ def test_workflows_without_sort_order_sort_after_ordered_workflows_by_id() -> No
     assert unordered_a.sort_order is None
 
 
+def test_load_wiki_types_reads_asset_manifests() -> None:
+    wiki_types = load_wiki_types()
+
+    assert [wiki_type.id for wiki_type in wiki_types] == ["basic"]
+    assert wiki_types[0].display_name == "Basic"
+    assert wiki_types[0].description == "汎用的なLLM wikiを構築する標準タイプ。"
+
+
+def test_default_wiki_type_uses_manifest_default_flag() -> None:
+    wiki_type = default_wiki_type()
+
+    assert wiki_type.id == "basic"
+    assert wiki_type.is_default is True
+
+
+def test_get_wiki_type_accepts_id_and_display_name() -> None:
+    assert get_wiki_type("basic").id == "basic"
+    assert get_wiki_type("Basic").id == "basic"
+
+
+def test_wiki_types_without_sort_order_sort_after_ordered_types_by_id() -> None:
+    ordered = _wiki_type_from_dict("ordered", sort_order=100)
+    unordered_b = _wiki_type_from_dict("zeta")
+    unordered_a = _wiki_type_from_dict("alpha")
+
+    wiki_types = sorted([unordered_b, ordered, unordered_a], key=_wiki_type_sort_key)
+
+    assert [wiki_type.id for wiki_type in wiki_types] == [
+        "ordered",
+        "alpha",
+        "zeta",
+    ]
+
+
 def _workflow_from_dict(workflow_id: str, sort_order: int | None = None) -> WorkflowManifest:
     data = {
         "id": workflow_id,
@@ -72,3 +114,15 @@ def _workflow_from_dict(workflow_id: str, sort_order: int | None = None) -> Work
     if sort_order is not None:
         data["sort_order"] = sort_order
     return WorkflowManifest.from_dict(data)
+
+
+def _wiki_type_from_dict(wiki_type_id: str, sort_order: int | None = None) -> WikiTypeManifest:
+    data = {
+        "id": wiki_type_id,
+        "display_name": wiki_type_id,
+        "description": wiki_type_id,
+        "version": "1.0.0",
+    }
+    if sort_order is not None:
+        data["sort_order"] = sort_order
+    return WikiTypeManifest.from_dict(data)
