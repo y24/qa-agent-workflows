@@ -5,5 +5,5 @@
   "version": "1.0.0",
   "sort_order": 300,
   "default": false,
-  "wiki_subdirs": ["reports", "viewpoints"]
+  "wiki_subdirs": ["reports", "viewpoints", "usecases"]
 }

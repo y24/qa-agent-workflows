@@ -6,6 +6,7 @@ This file is the navigation map for the wiki. Update it whenever pages are creat
 
 - `wiki/reports/`: One page per defect report. Use this section to find what each past defect was, its phenomenon, and its cause.
 - `wiki/viewpoints/`: Reusable lessons and test viewpoints extracted from the defects. Use this section to find recurrence-prevention angles for future test design and risk assessment.
+- `wiki/usecases/`: Usage scenarios (use cases) generalized from how defects were reproduced. Use this section to find real usage flows worth covering in test design.
 
 ## Sources
 
@@ -21,6 +22,11 @@ This file is the navigation map for the wiki. Update it whenever pages are creat
 
 | Page | Lesson / Viewpoint | Defect Pattern | Sources |
 | --- | --- | --- | --- |
+
+## Usecase Pages
+
+| Page | Usage Scenario | Sources |
+| --- | --- | --- |
 
 ## Open Questions
 

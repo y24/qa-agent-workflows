@@ -14,12 +14,13 @@ Audit the wiki as a durable, evidence-backed store of defect knowledge. The top 
 
 ## Checks
 
-- No speculation: every report summary, lesson, and viewpoint traces to a source under `raw/` or another wiki page. Flag any statement that no source supports.
+- No speculation: every report summary, lesson, viewpoint, and usecase traces to a source under `raw/` or another wiki page. Flag any statement that no source supports.
 - Phenomenon vs. cause: each report page keeps the observed phenomenon separate from the cause, and any cause not stated by the source is marked as unknown rather than guessed.
-- Index coverage: every `wiki/reports/` and `wiki/viewpoints/` page appears in the right table in `index.md`.
+- Usecase grounding: every usage scenario is generalized only from the reproduction steps and conditions the source defects state, with no invented actors, goals, or flow steps.
+- Index coverage: every `wiki/reports/`, `wiki/viewpoints/`, and `wiki/usecases/` page appears in the right table in `index.md`.
 - Filesystem consistency: every page listed in `index.md` exists.
-- Page placement: report pages summarize one defect, and viewpoint pages capture reusable recurrence-prevention angles.
-- Traceability: each viewpoint page lists the defect reports it was generalized from.
+- Page placement: report pages summarize one defect, viewpoint pages capture reusable recurrence-prevention angles, and usecase pages capture reusable usage scenarios.
+- Traceability: each viewpoint and usecase page lists the defect reports it was generalized from.
 - Contradictions: phenomena, causes, conditions, or lessons do not conflict silently across pages.
 - Freshness: recent `log.md` ingest and query entries are reflected in `index.md` and the relevant wiki pages.
 - Reuse quality: page names and summaries are specific enough for future test design and risk assessment to choose the right viewpoint.

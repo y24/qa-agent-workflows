@@ -29,15 +29,16 @@ Answer the user question from the accumulated defect knowledge first, to support
 ## Filing Rules
 
 - When a query produces a reusable recurrence-prevention lesson that the defects support, file or update it under `wiki/viewpoints/`.
+- When a query produces a reusable usage scenario (use case) generalized from defect reproduction, file or update it under `wiki/usecases/`.
 - When a query surfaces a defect that is not yet summarized, propose a new `wiki/reports/` page or note it for ingest.
 - Do not file trivial answers, temporary status checks, or anything not grounded in source evidence.
 
 ## Steps
 
-1. Read `index.md` and identify relevant report and viewpoint pages.
+1. Read `index.md` and identify relevant report, viewpoint, and usecase pages.
 2. Read the necessary `wiki/` pages. Check `raw/` only when the wiki is incomplete, contradictory, or too vague.
 3. Produce the answer with evidence paths and clear markers for unknown or missing information.
-4. Decide whether any result should be filed under `wiki/viewpoints/` or recorded as a missing `wiki/reports/` page.
+4. Decide whether any result should be filed under `wiki/viewpoints/` or `wiki/usecases/`, or recorded as a missing `wiki/reports/` page.
 5. If filing, create or update the page and update the matching table in `index.md`.
 6. If the query reveals missing lessons or stale report summaries, propose updates to `wiki/reports/` or `wiki/viewpoints/`.
 7. Append an entry to `log.md` in the format `## [YYYY-MM-DD] query | <question>`.
