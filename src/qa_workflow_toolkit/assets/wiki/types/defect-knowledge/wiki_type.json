@@ -1,0 +1,9 @@
+{
+  "id": "defect-knowledge",
+  "display_name": "Defect Knowledge Wiki",
+  "description": "過去の不具合レポートを要約・蓄積するwikiを構築",
+  "version": "1.0.0",
+  "sort_order": 300,
+  "default": false,
+  "wiki_subdirs": ["reports", "viewpoints"]
+}

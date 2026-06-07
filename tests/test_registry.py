@@ -64,10 +64,11 @@ def test_workflows_without_sort_order_sort_after_ordered_workflows_by_id() -> No
 def test_load_wiki_types_reads_asset_manifests() -> None:
     wiki_types = load_wiki_types()
 
-    assert [wiki_type.id for wiki_type in wiki_types] == ["basic", "test-viewpoint"]
+    assert [wiki_type.id for wiki_type in wiki_types] == ["basic", "test-viewpoint", "defect-knowledge"]
     assert wiki_types[0].display_name == "Basic Wiki"
     assert wiki_types[0].description == "汎用的なLLM wikiを構築"
     assert wiki_types[1].display_name == "Test Viewpoint Wiki"
+    assert wiki_types[2].display_name == "Defect Knowledge Wiki"
 
 
 def test_default_wiki_type_uses_manifest_default_flag() -> None:
