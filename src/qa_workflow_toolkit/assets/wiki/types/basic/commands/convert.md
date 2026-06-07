@@ -1,6 +1,6 @@
 ---
-description: .tempのファイルをraw向けMarkdownへ変換する
-argument-hint: <対象または質問>
+description: Convert staged files in .temp into evidence Markdown under raw
+argument-hint: <target or question>
 ---
 
 # LLM Wiki convert
@@ -8,19 +8,22 @@ argument-hint: <対象または質問>
 User request:
 {{arguments}}
 
-## 目的
+## Purpose
 
-`.temp/` に置かれた変換前ファイルを `markitdown` コマンドでMarkdownへ変換し、`raw/` に配置する。
+Convert staged source files from `.temp/` into Markdown evidence files under `raw/`. The converted file becomes a primary source for later ingest work.
 
-## 手順
+## Steps
 
-1. `.temp/` の対象ファイルを確認する。
-2. 出力先を `raw/<元ファイル名のstem>.md` として決める。
-3. `markitdown "<input>" -o "<output>"` を実行する。
-4. 変換後のMarkdownを軽く確認し、明らかな変換欠落や文字化けを記録する。
-5. `log.md` に `## [YYYY-MM-DD] convert | <file>` 形式で追記する。
+1. Identify the target file in `.temp/`. If the user did not specify a file, list likely candidates and choose only when the intent is clear.
+2. Set the output path to `raw/<source-file-stem>.md`. Use a short, stable, lowercase slug when the original filename is noisy.
+3. Before conversion, check whether the output path already exists.
+4. Run `markitdown "<input>" -o "<output>"`.
+5. Inspect the converted Markdown for empty output, missing major sections, broken tables, broken links, or mojibake.
+6. If conversion quality is acceptable, leave the file in `raw/` and report the path. If quality is poor, keep the file but record the issue clearly.
+7. Append an entry to `log.md` in the format `## [YYYY-MM-DD] convert | <file>`.
 
-## ガードレール
+## Guardrails
 
-- `raw/` に同名ファイルがある場合、ユーザー確認なしに上書きしない。
-- `markitdown` が利用できない場合は、インストールが必要なことを報告し、代替変換を勝手に実行しない。
+- If a file with the same name already exists in `raw/`, do not overwrite it without user confirmation.
+- If `markitdown` is unavailable, report that installation is required and do not run an alternative conversion on your own.
+- Do not summarize or reinterpret the source during conversion. Source interpretation belongs in `/ingest`.

@@ -4,29 +4,40 @@
 
 # [[wiki_name]] LLM Wiki
 
-このリポジトリは、LLMが継続的に保守するMarkdown wikiです。
+This repository is a Markdown knowledge base maintained by LLM agents. Treat it as a durable working memory: every update should be traceable to evidence, easy to re-read later, and placed where future agents can find it quickly.
 
-## 構成
+## Structure
 
-- `raw/`: 変換済みまたは取得済みの一次ソース。原則として不変の根拠として扱う。
-- `.temp/`: `raw/` へ変換する前の一時置き場。
-- `wiki/`: LLMが作成・更新する知識ページ。
-- `index.md`: wiki全体の内容索引。ingestやqueryの前に最初に確認する。
-- `log.md`: ingest、query、lint、convertの時系列ログ。追記専用で扱う。
-- agent別commands: wiki操作用のslash command。
+- `raw/`: Converted or collected primary sources. Treat them as immutable evidence by default.
+- `.temp/`: Temporary staging area for files before conversion into `raw/`.
+- `wiki/`: Knowledge pages created and updated by LLM agents. New pages must go into one of the subfolders below.
+- `wiki/articles/`: Source summary pages. Use one page per primary source, and keep the page focused on what that source says.
+- `wiki/concepts/`: Synthesis pages. Use these for concepts, methods, domains, entities, or research areas that require evidence from more than one source.
+- `wiki/queries/`: Filed answers. Use these for answers to concrete user questions when the answer should be kept for future reuse.
+- `index.md`: Content index for the whole wiki. Check it first before ingest or query work.
+- `log.md`: Append-only chronological log for ingest, query, lint, and convert operations.
+- Agent-specific commands: Slash commands for wiki operations.
 
-## 基本方針
+## Core Policies
 
-- 根拠のない事実、要件、関係性、日付、数値を創作しない。
-- 事実、推測、前提、未確認事項、提案を分けて記述する。
-- 重要な記述には、可能な限り `raw/` 内のファイルや `wiki/` ページへの参照を添える。
-- `raw/` の内容はユーザーの明示指示なしに変更しない。通常の編集対象は `wiki/`、`index.md`、`log.md` とする。
-- 新しい知識は一度きりの回答で終わらせず、必要に応じて `wiki/` にページ化または既存ページへ統合する。
-- 矛盾、古い可能性のある記述、根拠不足、未解決の前提は明示する。
+- Do not invent unsupported facts, requirements, relationships, dates, or numbers. If evidence is missing, say what is missing.
+- Separate facts, inferences, assumptions, unverified items, and proposals. Do not let inferred conclusions look like source facts.
+- Add references to files under `raw/` or pages under `wiki/` for important statements. Prefer stable relative paths such as `raw/source-name.md` or `wiki/concepts/topic.md`.
+- Do not modify `raw/` content without explicit user instruction. Normal edits should target `wiki/`, `index.md`, and `log.md`.
+- Do not leave reusable knowledge only in a one-off answer. When useful, create a page under `wiki/` or integrate it into an existing page.
+- Make contradictions, possibly outdated statements, insufficient evidence, and unresolved assumptions explicit.
+
+## Page Placement Rules
+
+- Create or update `wiki/articles/<source-slug>.md` when summarizing a single primary source. Do not mix unrelated source summaries into the same article page.
+- Create or update `wiki/concepts/<concept-slug>.md` when combining evidence from multiple sources or when extracting a reusable concept, method, taxonomy, entity, or research area.
+- Create or update `wiki/queries/<question-slug>.md` when preserving a question answer, especially if the answer required synthesis or will likely be asked again.
+- If a page could fit multiple folders, choose by purpose: source summary goes to `articles`, reusable synthesized knowledge goes to `concepts`, and answer records go to `queries`.
+- Keep filenames short, lowercase, hyphen-separated, and stable. Rename only when the current name is misleading.
 
 ## Operations
 
-- `/convert`: `.temp/` のファイルを `markitdown` でMarkdown化し、`raw/` に配置する。
-- `/ingest`: `raw/` のソースを読み、要約・エンティティ・概念・関係を `wiki/` に統合する。
-- `/query`: `index.md` と関連ページから回答を作り、必要な発見はwikiへ反映候補として示す。
-- `/lint`: 矛盾、孤立ページ、索引漏れ、根拠不足、更新漏れを点検する。
+- `/convert`: Convert files in `.temp/` to Markdown with `markitdown` and place them in `raw/`.
+- `/ingest`: Read sources in `raw/` and integrate summaries, entities, concepts, and relationships into `wiki/`.
+- `/query`: Answer from `index.md` and related pages, then identify findings that should be reflected back into the wiki.
+- `/lint`: Check contradictions, orphan pages, missing index entries, insufficient evidence, and missed updates.

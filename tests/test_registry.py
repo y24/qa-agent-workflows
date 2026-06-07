@@ -65,8 +65,8 @@ def test_load_wiki_types_reads_asset_manifests() -> None:
     wiki_types = load_wiki_types()
 
     assert [wiki_type.id for wiki_type in wiki_types] == ["basic"]
-    assert wiki_types[0].display_name == "Basic"
-    assert wiki_types[0].description == "汎用的なLLM wikiを構築する標準タイプ。"
+    assert wiki_types[0].display_name == "Basic Wiki"
+    assert wiki_types[0].description == "汎用的なLLM wikiを構築"
 
 
 def test_default_wiki_type_uses_manifest_default_flag() -> None:

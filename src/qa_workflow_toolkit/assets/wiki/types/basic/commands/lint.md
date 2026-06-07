@@ -1,6 +1,6 @@
 ---
-description: wikiの健全性を点検する
-argument-hint: <対象または質問>
+description: Audit wiki consistency, evidence, indexing, and page placement
+argument-hint: <target or question>
 ---
 
 # LLM Wiki lint
@@ -8,19 +8,30 @@ argument-hint: <対象または質問>
 User request:
 {{arguments}}
 
-## 目的
+## Purpose
 
-wikiの矛盾、根拠不足、索引漏れ、孤立ページ、古い記述、未解決事項を点検する。
+Audit the wiki as a durable knowledge base. Focus on issues that make future answers harder, less traceable, or less reliable.
 
-## 点検観点
+## Checks
 
-- `index.md` に存在しない `wiki/` ページがないか。
-- `index.md` に存在するが実体のないページがないか。
-- 重要概念が複数ページで矛盾していないか。
-- 根拠リンクや参照元が不足していないか。
-- `log.md` の最近のingest結果がwikiに反映されているか。
+- Index coverage: every `wiki/articles/`, `wiki/concepts/`, and `wiki/queries/` page appears in the right table in `index.md`.
+- Filesystem consistency: every page listed in `index.md` exists.
+- Page placement: article pages summarize one primary source, concept pages synthesize reusable knowledge, and query pages preserve answers to concrete questions.
+- Evidence quality: important claims cite `raw/` sources or other wiki pages.
+- Contradictions: important concepts, dates, entities, or relationships do not conflict silently across pages.
+- Freshness: recent `log.md` ingest and query entries are reflected in `index.md` and the relevant wiki pages.
+- Retrieval quality: page names and summaries are specific enough for future agents to choose the right page.
 
-## 出力
+## Output
 
-指摘は優先度、対象ファイル、根拠、提案修正に分けて整理する。
-`log.md` に `## [YYYY-MM-DD] lint | <scope>` 形式で追記する。
+Organize findings in this format:
+
+- `Priority`: High, Medium, or Low.
+- `File`: Target file or missing path.
+- `Issue`: What is wrong.
+- `Evidence`: What proves the issue.
+- `Proposed Fix`: Concrete change to make.
+
+Append an entry to `log.md` in the format `## [YYYY-MM-DD] lint | <scope>`.
+
+Do not make large corrective edits during lint unless the user explicitly asked for fixes. Small index or log corrections are acceptable when the intent is clear.

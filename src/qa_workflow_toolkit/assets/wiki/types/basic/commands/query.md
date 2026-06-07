@@ -1,6 +1,6 @@
 ---
-description: wikiを根拠に質問へ回答する
-argument-hint: <対象または質問>
+description: Answer a question from the wiki and optionally file the result
+argument-hint: <target or question>
 ---
 
 # LLM Wiki query
@@ -8,14 +8,29 @@ argument-hint: <対象または質問>
 User request:
 {{arguments}}
 
-## 目的
+## Purpose
 
-`index.md` と `wiki/` の関連ページを優先して質問に回答し、根拠と未確認事項を明示する。
+Answer the user question from existing wiki knowledge first. Use `raw/` only when the wiki is insufficient or when source verification is necessary. Preserve reusable answers under `wiki/queries/` when they would help future agents.
 
-## 手順
+## Answer Requirements
 
-1. `index.md` を読み、関連しそうなページとソースを特定する。
-2. 必要な `wiki/` ページを読み、足りない場合のみ `raw/` の確認を提案または実施する。
-3. 回答では、事実、推測、未確認事項を分けて書く。
-4. 回答からwikiへ残す価値がある知見が生まれた場合は、更新候補を提示する。
-5. `log.md` に `## [YYYY-MM-DD] query | <question>` 形式で追記する。
+- Start with the direct answer when the evidence supports one.
+- Separate `Evidence`, `Inference`, and `Unverified` information when the distinction matters.
+- Cite the wiki page or raw source paths that support important statements.
+- If the wiki does not contain enough evidence, say what is missing and which source should be checked next.
+
+## Filing Rules
+
+- File the answer under `wiki/queries/<question-slug>.md` when the answer is non-trivial, likely reusable, or synthesizes multiple pages.
+- Do not file trivial answers, temporary status checks, or answers with no durable knowledge value.
+- When filing, include the original question, concise answer, evidence, unverified items, and follow-up opportunities.
+
+## Steps
+
+1. Read `index.md` and identify relevant article, concept, and query pages.
+2. Read the necessary `wiki/` pages. Check `raw/` only when the wiki is incomplete, contradictory, or too vague.
+3. Produce the answer with evidence paths and clear uncertainty markers.
+4. Decide whether the result should be filed under `wiki/queries/`.
+5. If filing, create or update the query page and update the Query Pages table in `index.md`.
+6. If the query reveals missing concepts or stale summaries, propose updates to `wiki/articles/` or `wiki/concepts/`.
+7. Append an entry to `log.md` in the format `## [YYYY-MM-DD] query | <question>`.
