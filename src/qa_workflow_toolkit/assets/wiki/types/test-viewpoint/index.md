@@ -4,7 +4,7 @@ This file is the navigation map for the wiki. Update it whenever pages are creat
 
 ## Overview
 
-- `wiki/testcases/`: One page per source test case or test case set. Use this section to find what each source actually tests.
+- `wiki/documents/`: One page per source document. Use this section to find what each source covers about testing.
 - `wiki/viewpoints/`: Reusable test viewpoints extracted from the sources. Use this section to find testing angles for future test design and strategy.
 - `wiki/glossary/`: Product-specific terms, names, and conventions. Use this section to keep terminology consistent.
 
@@ -13,7 +13,7 @@ This file is the navigation map for the wiki. Update it whenever pages are creat
 | Source | Summary | Ingested |
 | --- | --- | --- |
 
-## Testcase Pages
+## Document Pages
 
 | Page | Summary | Sources |
 | --- | --- | --- |

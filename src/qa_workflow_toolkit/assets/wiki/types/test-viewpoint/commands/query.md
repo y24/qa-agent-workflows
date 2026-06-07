@@ -23,7 +23,7 @@ Answer the user question from the accumulated test viewpoints first, to support 
 - Start with the direct answer when the evidence supports one.
 - Separate `Evidence` from `Unknown / Missing` information when the distinction matters.
 - Cite the `wiki/` page or `raw/` source paths that support important statements.
-- When proposing viewpoints for a new feature, only reuse viewpoints already supported by source test cases, and mark anything beyond that as a gap rather than a fact.
+- When proposing viewpoints for a new feature, only reuse viewpoints already supported by source documents, and mark anything beyond that as a gap rather than a fact.
 
 ## Filing Rules
 
@@ -33,10 +33,10 @@ Answer the user question from the accumulated test viewpoints first, to support 
 
 ## Steps
 
-1. Read `index.md` and identify relevant testcase, viewpoint, and glossary pages.
+1. Read `index.md` and identify relevant document, viewpoint, and glossary pages.
 2. Read the necessary `wiki/` pages. Check `raw/` only when the wiki is incomplete, contradictory, or too vague.
 3. Produce the answer with evidence paths and clear markers for unknown or missing information.
 4. Decide whether any result should be filed under `wiki/viewpoints/` or `wiki/glossary/`.
 5. If filing, create or update the page and update the matching table in `index.md`.
-6. If the query reveals missing viewpoints or stale summaries, propose updates to `wiki/testcases/` or `wiki/viewpoints/`.
+6. If the query reveals missing viewpoints or stale summaries, propose updates to `wiki/documents/` or `wiki/viewpoints/`.
 7. Append an entry to `log.md` in the format `## [YYYY-MM-DD] query | <question>`.
