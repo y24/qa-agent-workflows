@@ -143,6 +143,7 @@ qatool workflow uninstall
 ## Wiki Commands
 
 `wiki` コマンドは、LLMが継続的に保守するMarkdown wikiの初期構成を作ったり、配布済みのwiki用agent assetsを更新するためのコマンド群です。
+新しい wiki type を追加する場合は、[docs/wiki-authoring/README.md](docs/wiki-authoring/README.md) を参照してください。
 
 ### wikiの新規構築
 
@@ -179,7 +180,7 @@ target-project/
    └─ convert.md
 ```
 
-package assets側のwiki typeテンプレートは以下の構成で管理します。新しいwiki typeを追加する場合は、`types/<wiki-type>/` を追加し、CLI側のwiki type registryに選択肢を追加します。
+package assets側のwiki typeテンプレートは以下の構成で管理します。新しいwiki typeを追加する場合は、`types/<wiki-type>/` と `wiki_type.json` を追加します。
 
 ```text
 src/qa_workflow_toolkit/assets/wiki/
