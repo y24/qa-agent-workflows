@@ -4,5 +4,6 @@
   "description": "汎用的なLLM wikiを構築",
   "version": "1.0.0",
   "sort_order": 100,
-  "default": true
+  "default": true,
+  "wiki_subdirs": ["articles", "concepts", "queries"]
 }

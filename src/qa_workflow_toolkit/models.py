@@ -87,6 +87,7 @@ class WikiTypeManifest:
     version: str
     sort_order: int | None
     is_default: bool
+    wiki_subdirs: tuple[str, ...]
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "WikiTypeManifest":
@@ -107,6 +108,7 @@ class WikiTypeManifest:
             version=str(data["version"]),
             sort_order=int(data["sort_order"]) if data.get("sort_order") is not None else None,
             is_default=bool(data.get("default", False)),
+            wiki_subdirs=tuple(str(subdir) for subdir in data.get("wiki_subdirs") or ()),
         )
 
 

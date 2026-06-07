@@ -55,19 +55,25 @@ def build_wiki_init_items(
         ),
         WikiInitItem("raw_dir", target_dir / "raw", is_dir=True),
         WikiInitItem("wiki_dir", target_dir / "wiki", is_dir=True),
-        WikiInitItem("wiki_articles_dir", target_dir / "wiki" / "articles", is_dir=True),
-        WikiInitItem("wiki_concepts_dir", target_dir / "wiki" / "concepts", is_dir=True),
-        WikiInitItem("wiki_queries_dir", target_dir / "wiki" / "queries", is_dir=True),
-        WikiInitItem("temp_dir", target_dir / ".temp", is_dir=True),
-        WikiInitItem("raw_keep", target_dir / "raw" / ".gitkeep", ""),
-        WikiInitItem("wiki_keep", target_dir / "wiki" / ".gitkeep", ""),
-        WikiInitItem("wiki_articles_keep", target_dir / "wiki" / "articles" / ".gitkeep", ""),
-        WikiInitItem("wiki_concepts_keep", target_dir / "wiki" / "concepts" / ".gitkeep", ""),
-        WikiInitItem("wiki_queries_keep", target_dir / "wiki" / "queries" / ".gitkeep", ""),
-        WikiInitItem("temp_keep", target_dir / ".temp" / ".gitkeep", ""),
-        WikiInitItem("index", target_dir / "index.md", _template("wiki/index.md", wiki_name=wiki_name, wiki_type=resolved_wiki_type.id)),
-        WikiInitItem("log", target_dir / "log.md", _template("wiki/log.md", wiki_type=resolved_wiki_type.id)),
     ]
+    for subdir in resolved_wiki_type.wiki_subdirs:
+        items.append(WikiInitItem(f"wiki_{subdir}_dir", target_dir / "wiki" / subdir, is_dir=True))
+    items.extend(
+        [
+            WikiInitItem("temp_dir", target_dir / ".temp", is_dir=True),
+            WikiInitItem("raw_keep", target_dir / "raw" / ".gitkeep", ""),
+            WikiInitItem("wiki_keep", target_dir / "wiki" / ".gitkeep", ""),
+        ]
+    )
+    for subdir in resolved_wiki_type.wiki_subdirs:
+        items.append(WikiInitItem(f"wiki_{subdir}_keep", target_dir / "wiki" / subdir / ".gitkeep", ""))
+    items.extend(
+        [
+            WikiInitItem("temp_keep", target_dir / ".temp" / ".gitkeep", ""),
+            WikiInitItem("index", target_dir / "index.md", _template("wiki/index.md", wiki_name=wiki_name, wiki_type=resolved_wiki_type.id)),
+            WikiInitItem("log", target_dir / "log.md", _template("wiki/log.md", wiki_type=resolved_wiki_type.id)),
+        ]
+    )
     for operation in WIKI_OPERATIONS:
         items.append(
             WikiInitItem(

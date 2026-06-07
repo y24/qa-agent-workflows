@@ -1,0 +1,9 @@
+{
+  "id": "test-viewpoint",
+  "display_name": "Test Viewpoint Wiki",
+  "description": "既存テストケースからテスト観点を抽出・蓄積し、将来のテスト設計や戦略に活用するwikiを構築",
+  "version": "1.0.0",
+  "sort_order": 200,
+  "default": false,
+  "wiki_subdirs": ["testcases", "viewpoints", "glossary"]
+}
