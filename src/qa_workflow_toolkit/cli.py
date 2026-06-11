@@ -40,6 +40,7 @@ from .wiki import (
     WIKI_OPERATIONS,
     build_wiki_init_items,
     build_wiki_update_items,
+    ensure_wiki_gitignore,
     init_wiki_from_items,
     is_wiki_initialized,
     resolve_wiki_type,
@@ -113,6 +114,7 @@ def _run_wiki_init(
         raise typer.Exit(1)
 
     result = init_wiki_from_items(plan, overwrite=overwrite, overwrite_targets=overwrite_targets)
+    gitignore_result = ensure_wiki_gitignore(resolved_target)
     record_repository_config(
         resolved_target,
         selected_agent,
@@ -120,9 +122,12 @@ def _run_wiki_init(
         agents_md_kind=AGENTS_MD_KIND_WIKI,
         wiki_type=selected_wiki_type,
     )
-    console.print(f"\n[green]Created {len(result.created)} item(s).[/green]")
+    created_count = len(result.created) + (1 if gitignore_result.created else 0)
+    console.print(f"\n[green]Created {created_count} item(s).[/green]")
     if result.overwritten:
         console.print(f"[yellow]Overwritten {len(result.overwritten)} item(s).[/yellow]")
+    if gitignore_result.added and not gitignore_result.created:
+        console.print(f"[yellow]Updated .gitignore with {len(gitignore_result.added)} entry(s).[/yellow]")
     if result.skipped:
         console.print(f"[yellow]Skipped {len(result.skipped)} existing item(s).[/yellow]")
     console.print("Usage:")

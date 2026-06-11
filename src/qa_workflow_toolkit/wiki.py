@@ -32,6 +32,14 @@ class WikiInitResult:
     skipped: tuple[Path, ...]
 
 
+@dataclass(frozen=True)
+class GitignoreUpdateResult:
+    path: Path
+    added: tuple[str, ...]
+    created: bool = False
+
+
+WIKI_GITIGNORE_ENTRIES = (".obsidian", ".qatool", ".temp")
 WIKI_NAME_PATTERN = re.compile(r"<!--\s*wiki-name:\s*(.*?)\s*-->")
 WIKI_HEADING_PATTERN = re.compile(r"^#\s+(.+?)\s+LLM Wiki\s*$", re.MULTILINE)
 
@@ -160,6 +168,25 @@ def init_wiki_from_items(
             created.append(item.target)
 
     return WikiInitResult(created=tuple(created), overwritten=tuple(overwritten), skipped=tuple(skipped))
+
+
+def ensure_wiki_gitignore(target_dir: Path) -> GitignoreUpdateResult:
+    gitignore = target_dir / ".gitignore"
+    if not gitignore.exists():
+        gitignore.parent.mkdir(parents=True, exist_ok=True)
+        gitignore.write_text("\n".join(WIKI_GITIGNORE_ENTRIES) + "\n", encoding="utf-8")
+        return GitignoreUpdateResult(path=gitignore, added=WIKI_GITIGNORE_ENTRIES, created=True)
+
+    content = gitignore.read_text(encoding="utf-8")
+    existing_entries = {line.strip() for line in content.splitlines()}
+    missing_entries = tuple(entry for entry in WIKI_GITIGNORE_ENTRIES if entry not in existing_entries)
+    if not missing_entries:
+        return GitignoreUpdateResult(path=gitignore, added=())
+
+    separator = "" if not content or content.endswith(("\n", "\r")) else "\n"
+    appended_content = "\n".join(missing_entries)
+    gitignore.write_text(f"{content}{separator}{appended_content}\n", encoding="utf-8")
+    return GitignoreUpdateResult(path=gitignore, added=missing_entries)
 
 
 def resolve_existing_wiki_name(target_dir: Path) -> str:

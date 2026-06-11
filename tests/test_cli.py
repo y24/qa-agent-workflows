@@ -313,8 +313,9 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         )
 
         assert result.exit_code == 0
-        assert "Created 19 item(s)." in result.output
+        assert "Created 20 item(s)." in result.output
         assert (target / "AGENTS.md").is_file()
+        assert (target / ".gitignore").read_text(encoding="utf-8") == ".obsidian\n.qatool\n.temp\n"
         assert (target / "raw" / ".gitkeep").is_file()
         assert (target / "wiki" / ".gitkeep").is_file()
         assert (target / "wiki" / "articles" / ".gitkeep").is_file()
@@ -338,6 +339,21 @@ def test_wiki_init_creates_llm_wiki_assets() -> None:
         assert 'markitdown "<input>" -o "<output>"' in (
             target / ".roo" / "commands" / "convert.md"
         ).read_text(encoding="utf-8")
+    finally:
+        shutil.rmtree(target, ignore_errors=True)
+
+
+def test_wiki_init_appends_missing_gitignore_entries() -> None:
+    target = Path("work") / "test-tmp" / f"qatool-wiki-gitignore-{uuid.uuid4().hex}"
+    target.mkdir(parents=True)
+    (target / ".gitignore").write_text("dist/\n.qatool\n", encoding="utf-8")
+    try:
+        result = CliRunner().invoke(app, ["wiki", "init", "--target", str(target), "--yes"])
+
+        assert result.exit_code == 0
+        assert "Created 19 item(s)." in result.output
+        assert "Updated .gitignore with 2 entry(s)." in result.output
+        assert (target / ".gitignore").read_text(encoding="utf-8") == "dist/\n.qatool\n.obsidian\n.temp\n"
     finally:
         shutil.rmtree(target, ignore_errors=True)
 
